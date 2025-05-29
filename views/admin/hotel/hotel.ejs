@@ -1,184 +1,179 @@
 <%- include('../layout/header') %>
-<%- include('../layout/sidebar') %>
+    <%- include('../layout/sidebar') %>
 
-<div class="content-wrapper bg-white">
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>Hotel Management</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
-                        <li class="breadcrumb-item active text-gray">Hotel Management</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">All Hotels</h3>
-                            <div class="d-flex gap-2 justify-content-end">
-                                <form method="get" action="/admin/hotel/hotel" class="d-flex" id="searchForm">
-                                    <input type="text" name="search" class="form-control form-control-sm me-2"
-                                        placeholder="Search by name" value="<%= search %>" />
-                                    <button class="btn btn-sm btn-outline-dark" type="submit">Search</button>
-                                </form>
-                                <a href="/admin/hotel/renderAddPage" class="btn btn-sm btn-outline-dark ms-2">
-                                    <i class="fas fa-plus"></i> Add New
-                                </a>
-                            </div>
+        <div class="content-wrapper bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">Hotel Management</li>
+                            </ol>
                         </div>
-
-                        <div class="card-body table-responsive" id="hotel-table-container">
-                            <table class="table table-hover align-middle">
-                                <thead class="bg-gray-100">
-                                    <tr>
-                                        <th class="text-dark">ID</th>
-                                        <th class="text-dark">Hotel</th>
-                                        <th class="text-dark">Address</th>
-                                        <th class="text-dark">Rating</th>
-                                        <th class="text-dark">Price/Night</th>
-                                        <th class="text-dark">Image</th>
-                                        <th class="text-dark">Featured</th>
-                                        <th class="text-dark">Status</th>
-                                        <th class="text-dark">Updated</th>
-                                        <th class="text-dark">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% hotels.forEach(hotel=> { %>
-                                        <tr class="bg-white">
-                                            <td>
-                                                <%= hotel.id %>
-                                            </td>
-                                            <td>
-                                                <strong>
-                                                    <%= hotel.name %>
-                                                </strong>
-                                                <br>
-                                                <small class="text-muted">
-                                                    <%= hotel.slug %>
-                                                </small>
-                                            </td>
-                                            <td class="text-gray">
-                                                <%= hotel.address || 'N/A' %>
-                                            </td>
-                                            <td>
-                                                <% for (let i=0; i < hotel.star_rating; i++) { %>
-                                                    <i class="fas fa-star text-warning"></i>
-                                                    <% } %>
-                                            </td>
-                                            <td>
-                                                $<%= parseFloat(hotel.price_per_night).toFixed(2) %>
-                                            </td>
-                                            <td>
-                                                <% if (hotel.mainImage) { %>
-                                                    <img src="<%= hotel.mainImage %>" class="img-thumbnail"
-                                                        style="max-height: 40px; max-width: 60px;" />
-                                                    <% } else { %>
-                                                        <span class="text-gray">No image</span>
-                                                        <% } %>
-                                            </td>
-                                            <td>
-                                                <% if (hotel.is_featured) { %>
-                                                    <span class="badge bg-success">Yes</span>
-                                                    <% } else { %>
-                                                        <span class="badge bg-secondary">No</span>
-                                                        <% } %>
-                                            </td>
-                                            <td>
-                                                <% if (hotel.is_active) { %>
-                                                    <span class="badge bg-success">Active</span>
-                                                    <% } else { %>
-                                                        <span class="badge bg-danger">Inactive</span>
-                                                        <% } %>
-                                            </td>
-                                            <td class="text-gray">
-                                                <%= new Date(hotel.updated_at).toLocaleDateString() %>
-                                            </td>
-                                            <td>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-outline-dark dropdown-toggle"
-                                                        data-bs-toggle="dropdown">Actions</button>
-                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
-                                                        <li><a class="dropdown-item text-gray"
-                                                                href="/admin/hotel/renderHotelDetail/<%= hotel.id %>">
-                                                                <i class="fas fa-eye me-2"></i> View
-                                                            </a></li>
-                                                        <li><a class="dropdown-item text-gray"
-                                                                href="/admin/hotel/renderEditPage/<%= hotel.id %>">
-                                                                <i class="fas fa-edit me-2"></i> Edit
-                                                            </a></li>
-                                                        <li>
-                                                            <hr class="dropdown-divider" />
-                                                        </li>
-                                                        <li><a class="dropdown-item text-danger"
-                                                                href="/admin/hotel/delete/<%= hotel.id %>"
-                                                                onclick="return confirm('Are you sure you want to delete this hotel?');">
-                                                                <i class="fas fa-trash me-2"></i> Delete
-                                                            </a></li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <% }); %>
-                                </tbody>
-                            </table>
-
-                            <!-- Pagination Footer -->
-                            <div class="card-footer bg-light">
-                                <div class="d-flex justify-content-between">
-                                    <div class="text-gray">
-                                        Showing <%= hotels.length %> of <%= total %> entries
-                                    </div>
-                                    <ul class="pagination pagination-sm mb-0">
-                                        <% for (let i=1; i <=totalPages; i++) { %>
-                                            <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-                                                <a class="page-link"
-                                                    href="/admin/hotel/hotel?page=<%= i %>&search=<%= search %>">
-                                                    <%= i %>
-                                                </a>
-                                            </li>
-                                            <% } %>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card -->
+                    </div>
                 </div>
-            </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">All Hotels</h3>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form method="get" action="/admin/hotel/hotel" class="d-flex" id="searchForm">
+                                            <input type="text" name="search" class="form-control form-control-sm me-2"
+                                                placeholder="Search by name" value="<%= search %>" />
+                                            <button class="btn btn-sm btn-outline-dark" type="submit">Search</button>
+                                        </form>
+                                        <a href="/admin/hotel/renderAddPage" class="btn btn-sm btn-outline-dark ms-2">
+                                            <i class="fas fa-plus"></i> Add New
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card-body table-responsive" id="hotel-table-container">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="text-dark">ID</th>
+                                                <th class="text-dark">Hotel</th>
+                                                <th class="text-dark">Address</th>
+                                                <th class="text-dark">Rating</th>
+                                                <th class="text-dark">Price/Day</th>
+                                                <th class="text-dark">Image</th>
+                                                <th class="text-dark">Featured</th>
+                                                <th class="text-dark">Status</th>
+                                                <th class="text-dark">Updated</th>
+                                                <th class="text-dark">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% hotels.forEach(hotel=> { %>
+                                                <tr class="bg-white">
+                                                    <td>
+                                                        <%= hotel.id %>
+                                                    </td>
+                                                    <td>
+                                                        <strong>
+                                                            <%= hotel.name %>
+                                                        </strong>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <%= hotel.slug %>
+                                                        </small>
+                                                    </td>
+                                                    <td class="text-gray">
+                                                        <%= hotel.address || 'N/A' %>
+                                                    </td>
+                                                    <td>
+                                                        <%= hotel.star_rating %>/5
+                                                    </td>
+                                                    <td>
+                                                        $<%= parseFloat(hotel.price_per_night).toFixed(2) %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (hotel.mainImage) { %>
+                                                            <img src="<%= hotel.mainImage %>" class="img-thumbnail"
+                                                                style="max-height: 40px; max-width: 60px;" />
+                                                            <% } else { %>
+                                                                <span class="text-gray">No image</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (hotel.is_featured) { %>
+                                                            <span class="badge bg-success">Yes</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-secondary">No</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (hotel.is_active) { %>
+                                                            <span class="badge bg-success">Active</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-danger">Inactive</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td class="text-gray">
+                                                        <%= new Date(hotel.updated_at).toLocaleDateString() %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                                                data-bs-toggle="dropdown">Actions</button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/hotel/renderHotelDetail/<%= hotel.id %>">
+                                                                        <i class="fas fa-eye me-2"></i> View
+                                                                    </a></li>
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/hotel/renderEditPage/<%= hotel.id %>">
+                                                                        <i class="fas fa-edit me-2"></i> Edit
+                                                                    </a></li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider" />
+                                                                </li>
+                                                                <li><a class="dropdown-item text-danger"
+                                                                        href="/admin/hotel/delete/<%= hotel.id %>"
+                                                                        onclick="return confirm('Are you sure you want to delete this hotel?');">
+                                                                        <i class="fas fa-trash me-2"></i> Delete
+                                                                    </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Pagination Footer -->
+                                    <div class="card-footer bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="text-gray">
+                                                Showing <%= hotels.length %> of <%= total %> entries
+                                            </div>
+                                            <ul class="pagination pagination-sm mb-0">
+                                                <% for (let i=1; i <=totalPages; i++) { %>
+                                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/admin/hotel/hotel?page=<%= i %>&search=<%= search %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
-    </section>
-</div>
 
-<%- include('../layout/footer') %>
+        <%- include('../layout/footer') %>
 
-<script>
-    // Fetch and update hotel list
-    function fetchHotels(page = 1, search = '') {
-        const params = new URLSearchParams({ page, search });
-        fetch(`/admin/hotel/hotel?${params.toString()}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(res => res.json())
-            .then(data => {
-                renderTable(data.hotels);
-                renderPagination(data.totalPages, data.currentPage, data.search);
-                updateShowingText(data.hotels.length, data.total);
-            })
-            .catch(err => console.error('Error:', err));
-    }
+            <script>
+                // Fetch and update hotel list
+                function fetchHotels(page = 1, search = '') {
+                    const params = new URLSearchParams({ page, search });
+                    fetch(`/admin/hotel/hotel?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            renderTable(data.hotels);
+                            renderPagination(data.totalPages, data.currentPage, data.search);
+                            updateShowingText(data.hotels.length, data.total);
+                        })
+                        .catch(err => console.error('Error:', err));
+                }
 
-    // Render table body rows dynamically
-    function renderTable(hotels) {
-        const tbody = hotels.map(hotel => `
+                // Render table body rows dynamically
+                function renderTable(hotels) {
+                    const tbody = hotels.map(hotel => `
             <tr class="bg-white">
                 <td>${hotel.id}</td>
                 <td>
@@ -189,16 +184,16 @@
                 <td class="text-gray">${hotel.address || 'N/A'}</td>
                 <td>${'<i class="fas fa-star text-warning"></i>'.repeat(hotel.star_rating)}</td>
                 <td>$${parseFloat(hotel.price_per_night).toFixed(2)}</td>
-                <td>${hotel.mainImage 
-                    ? `<img src="${hotel.mainImage}" class="img-thumbnail" style="max-height: 40px; max-width: 60px;" />` 
-                    : `<span class="text-gray">No image</span>`}
+                <td>${hotel.mainImage
+                            ? `<img src="${hotel.mainImage}" class="img-thumbnail" style="max-height: 40px; max-width: 60px;" />`
+                            : `<span class="text-gray">No image</span>`}
                 </td>
-                <td>${hotel.is_featured 
-                    ? '<span class="badge bg-success">Yes</span>' 
-                    : '<span class="badge bg-secondary">No</span>'}</td>
-                <td>${hotel.is_active 
-                    ? '<span class="badge bg-success">Active</span>' 
-                    : '<span class="badge bg-danger">Inactive</span>'}</td>
+                <td>${hotel.is_featured
+                            ? '<span class="badge bg-success">Yes</span>'
+                            : '<span class="badge bg-secondary">No</span>'}</td>
+                <td>${hotel.is_active
+                            ? '<span class="badge bg-success">Active</span>'
+                            : '<span class="badge bg-danger">Inactive</span>'}</td>
                 <td class="text-gray">${new Date(hotel.updated_at).toLocaleDateString()}</td>
                 <td>
                     <div class="dropdown">
@@ -220,34 +215,33 @@
                 </td>
             </tr>
         `).join('');
-        document.querySelector('#hotel-table-container tbody').innerHTML = tbody;
-    }
+                    document.querySelector('#hotel-table-container tbody').innerHTML = tbody;
+                }
 
-    // Render pagination buttons dynamically
-    function renderPagination(totalPages, currentPage, search) {
-        let paginationHTML = '';
-        for (let i = 1; i <= totalPages; i++) {
-            paginationHTML += `
+                // Render pagination buttons dynamically
+                function renderPagination(totalPages, currentPage, search) {
+                    let paginationHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHTML += `
                 <li class="page-item ${i === currentPage ? 'active' : ''}">
                     <a class="page-link" href="#" onclick="fetchHotels(${i}, '${search}')">${i}</a>
                 </li>`;
-        }
-        document.querySelector('#hotel-table-container .pagination').innerHTML = paginationHTML;
-    }
+                    }
+                    document.querySelector('#hotel-table-container .pagination').innerHTML = paginationHTML;
+                }
 
-    // Update the "Showing X of Y entries" text dynamically
-    function updateShowingText(currentCount, total) {
-        const textDiv = document.querySelector('.card-footer .text-gray');
-        if (textDiv) {
-            textDiv.textContent = `Showing ${currentCount} of ${total} entries`;
-        }
-    }
+                // Update the "Showing X of Y entries" text dynamically
+                function updateShowingText(currentCount, total) {
+                    const textDiv = document.querySelector('.card-footer .text-gray');
+                    if (textDiv) {
+                        textDiv.textContent = `Showing ${currentCount} of ${total} entries`;
+                    }
+                }
 
-    // Intercept form submit and fetch via AJAX
-    document.getElementById('searchForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const search = this.search.value.trim();
-        fetchHotels(1, search);
-    });
-</script>
-
+                // Intercept form submit and fetch via AJAX
+                document.getElementById('searchForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const search = this.search.value.trim();
+                    fetchHotels(1, search);
+                });
+            </script>

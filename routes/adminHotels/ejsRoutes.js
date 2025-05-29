@@ -18,42 +18,91 @@ const router = express.Router();
 //     }
 // });
 
+// router.get('/hotel/hotel', isAdmin, async (req, res) => {
+//     try {
+//         const search = req.query.search || '';
+
+//         // Optionally filter the query based on the search value
+//         const [hotels] = await db.query(`
+//             SELECT * FROM hotels
+//             ${search ? 'WHERE name LIKE ?' : ''}
+//         `, search ? [`%${search}%`] : []);
+
+//         // Count total hotels for pagination
+//         const [[{ total }]] = await db.query(`
+//             SELECT COUNT(*) as total FROM hotels
+//             ${search ? 'WHERE name LIKE ?' : ''}
+//         `, search ? [`%${search}%`] : []);
+
+//         const currentPage = parseInt(req.query.page) || 1;
+//         const perPage = 10;
+//         const totalPages = Math.ceil(total / perPage);
+
+//         const [paginatedHotels] = await db.query(`
+//             SELECT * FROM hotels
+//             ${search ? 'WHERE name LIKE ?' : ''}
+//             LIMIT ? OFFSET ?
+//         `, search ? [`%${search}%`, perPage, (currentPage - 1) * perPage] : [perPage, (currentPage - 1) * perPage]);
+
+//         res.render('admin/hotel/hotel', {
+//             hotels: paginatedHotels,
+//             search,
+//             total,
+//             totalPages,
+//             currentPage
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         res.status(500).send({ message: "Internal Server Error" });
+//     }
+// });
+
 router.get('/hotel/hotel', isAdmin, async (req, res) => {
     try {
         const search = req.query.search || '';
-
-        // Optionally filter the query based on the search value
-        const [hotels] = await db.query(`
-            SELECT * FROM hotels
-            ${search ? 'WHERE name LIKE ?' : ''}
-        `, search ? [`%${search}%`] : []);
-
-        // Count total hotels for pagination
-        const [[{ total }]] = await db.query(`
-            SELECT COUNT(*) as total FROM hotels
-            ${search ? 'WHERE name LIKE ?' : ''}
-        `, search ? [`%${search}%`] : []);
-
         const currentPage = parseInt(req.query.page) || 1;
         const perPage = 10;
+        const offset = (currentPage - 1) * perPage;
+
+        // Query for filtered hotels
+        const searchQuery = search ? `%${search}%` : '%';
+
+        const [hotels] = await db.query(
+            `SELECT * FROM hotels WHERE name LIKE ? LIMIT ? OFFSET ?`,
+            [searchQuery, perPage, offset]
+        );
+
+        // Query for total count
+        const [[{ total }]] = await db.query(
+            `SELECT COUNT(*) as total FROM hotels WHERE name LIKE ?`,
+            [searchQuery]
+        );
+
         const totalPages = Math.ceil(total / perPage);
 
-        const [paginatedHotels] = await db.query(`
-            SELECT * FROM hotels
-            ${search ? 'WHERE name LIKE ?' : ''}
-            LIMIT ? OFFSET ?
-        `, search ? [`%${search}%`, perPage, (currentPage - 1) * perPage] : [perPage, (currentPage - 1) * perPage]);
+        // If it's an AJAX request, return JSON
+        if (req.headers['x-requested-with'] === 'XMLHttpRequest') {
+            return res.json({
+                hotels,
+                total,
+                totalPages,
+                currentPage,
+                search
+            });
+        }
 
+        // Otherwise, render the EJS page
         res.render('admin/hotel/hotel', {
-            hotels: paginatedHotels,
-            search,
+            hotels,
             total,
             totalPages,
-            currentPage
+            currentPage,
+            search
         });
+
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Internal Server Error" });
+        console.error('Error fetching hotels:', error);
+        res.status(500).send('Server error');
     }
 });
 
@@ -63,7 +112,12 @@ router.get('/hotel/renderEditPage/:id', isAdmin, async (req, res) => {
 
     try {
         // 1. Get the hotel by ID
-        const [hotelRows] = await db.query(`SELECT * FROM hotels WHERE id = ?`, [id]);
+        const [hotelRows] = await db.query(`
+  SELECT h.*, c.name as city_name
+  FROM hotels h
+  LEFT JOIN city c ON h.city_id = c.id
+  WHERE h.id = ?
+`, [id]);
         if (hotelRows.length === 0) {
             return res.status(404).send({ message: "hotel not found" });
         }
@@ -71,7 +125,6 @@ router.get('/hotel/renderEditPage/:id', isAdmin, async (req, res) => {
         const [hotelImages] = await db.query(`SELECT * FROM hotel_images WHERE hotel_id = ?`, [id]);
         console.log(hotelImages);
         // 2. Get all slugs
-        const [cities] = await db.query('SELECT id, name FROM city');
         const [themes] = await db.query('SELECT id, name FROM theme');
 
         // 3. Render the edit page with both hotel and slugs
@@ -82,7 +135,6 @@ router.get('/hotel/renderEditPage/:id', isAdmin, async (req, res) => {
                 { label: 'Edit hotel' }
             ],
             hotel: hotelRows[0],
-            cities,
             themes,
             hotelImages
         });
@@ -115,7 +167,7 @@ router.get('/hotel/renderAddPage', async (req, res) => {
     try {
         const [hotelImages] = await db.query('SELECT * FROM hotel_images');
         console.log(" hotelImages => ", hotelImages);
-        const [cities] = await db.query('SELECT id, name FROM city');
+        // const [cities] = await db.query('SELECT id, name FROM city');
         const [themes] = await db.query('SELECT id, name FROM theme');
         res.render('admin/hotel/add', {
             breadcrumbs: [
@@ -123,7 +175,7 @@ router.get('/hotel/renderAddPage', async (req, res) => {
                 { label: 'hotels', url: '/admin/hotel/hotel' },
                 { label: 'Add hotel' }
             ],
-            cities,
+            // cities,
             themes
         });
     } catch (error) {
@@ -134,19 +186,19 @@ router.get('/hotel/renderAddPage', async (req, res) => {
 
 
 // slug
-router.get('/hotel/renderhotelDetail/:id', isAdmin, async (req, res) => {
+router.get('/hotel/renderHotelDetail/:id', async (req, res) => {
     const id = req.params.id;
 
     try {
         const [rows] = await db.query(`
-            SELECT * FROM hotel
-            WHERE hotel.id = ?
+            SELECT * FROM hotels
+            WHERE id = ?
         `, [id]);
 
         if (rows.length === 0) {
             return res.status(404).send({ message: "hotel not found" });
         }
-        // console.log(rows)
+        console.log(rows)
         res.render('admin/hotel/show', { hotel: rows[0] });
     } catch (err) {
         console.error(err);
