@@ -1,0 +1,45 @@
+{
+    "name": "adminjs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "nodemon index.js",
+        "start": "node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "dependencies": {
+        "argon2": "^0.41.1",
+        "bcrypt": "^6.0.0",
+        "dotenv": "^16.5.0",
+        "ejs": "^3.1.10",
+        "express": "^5.1.0",
+        "express-formidable": "^1.2.0",
+        "express-session": "^1.18.1",
+        "mongoose": "^8.13.2",
+        "jsonwebtoken": "^9.0.2",
+        "axios": "^1.7.9",
+        "bcryptjs": "^3.0.2",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "cron": "^4.0.0",
+        "multer": "^1.4.5-lts.2",
+        "mysql": "^2.18.1",
+        "mysql2": "^3.14.1",
+        "react": "^18.3.1",
+        "react-circular-progressbar": "^2.2.0",
+        "react-dom": "^18.3.1",
+        "react-quill": "^2.0.0",
+        "react-router-dom": "^7.5.2",
+        "recharts": "^2.15.3",
+        "sanitize-html": "^2.16.0",
+        "sequelize": "^6.37.7",
+        "tslib": "^2.8.1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
+}

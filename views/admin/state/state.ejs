@@ -1,0 +1,193 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="content-wrapper bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">States Management</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title mb-2 mb-sm-0">All States</h3>
+
+                            <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                <div class="input-group input-group-sm" style="max-width: 250px;">
+                                    <input type="text" id="searchInput" class="form-control"
+                                        placeholder="Search by name...">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                                <a href="/admin/state/renderAddPage" class="btn btn-sm btn-outline-dark">
+                                    <i class="fas fa-plus"></i> Add New
+                                </a>
+                            </div>
+                        </div>
+
+
+                        <div class="card-body">
+                            <table class="table table-hover align-middle">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="text-dark">ID</th>
+                                        <th class="text-dark">Name</th>
+                                        <th class="text-dark">Description</th>
+                                        <th class="text-dark">Region</th>
+                                        <th class="text-dark">Image</th>
+                                        <th class="text-dark">Meta Title</th>
+                                        <th class="text-dark">Updated</th>
+                                        <th class="text-dark">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% states.forEach(state=> { %>
+                                        <tr class="bg-white">
+                                            <td>
+                                                <%= state.id %>
+                                            </td>
+                                            <td><strong>
+                                                    <%= state.name %>
+                                                </strong></td>
+                                            <td class="text-gray">
+                                                <%= state.description %>
+                                            </td>
+                                            <td class="text-gray">
+                                                <%= state.region_name %>
+                                            </td>
+                                            <td>
+                                                <% if (state.image) { %>
+                                                    <img src="<%= state.image %>" class="img-thumbnail"
+                                                        style="max-width: 60px; max-height: 40px;">
+                                                    <% } else { %>
+                                                        <span class="text-gray">No image</span>
+                                                        <% } %>
+                                            </td>
+                                            <td class="text-gray">
+                                                <%= state.meta_title || '' %>
+                                            </td>
+                                            <td class="text-gray">
+                                                <%= new Date(state.updated_at).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                                        type="button" data-bs-toggle="dropdown">
+                                                        Actions
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                        <li>
+                                                            <a class="dropdown-item text-gray"
+                                                                href="/admin/state/renderStateDetail/<%= state.id %>">
+                                                                <i class="fas fa-eye me-2"></i> View
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-gray"
+                                                                href="/admin/state/renderEditPage/<%= state.id %>">
+                                                                <i class="fas fa-edit me-2"></i> Edit
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <hr class="dropdown-divider">
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-gray"
+                                                                href="/admin/state/delete/<%= state.id %>"
+                                                                onclick="return confirm('Are you sure you want to delete <%= state.name %> state?');">
+                                                                <i class="fas fa-trash-alt me-2"></i> Delete
+                                                            </a>
+
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer bg-light d-flex justify-content-between">
+                            <div class="text-gray">Showing <%= states.length %> entries</div>
+                            <!-- Pagination could go here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <%- include('../layout/footer') %>
+
+            <script>
+                document.getElementById('searchInput').addEventListener('keyup', function () {
+                    const query = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('tbody tr');
+
+                    rows.forEach(row => {
+                        const name = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+                        if (name.includes(query)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            </script>
+
+
+            <style>
+                .bg-gray-100 {
+                    background-color: #f8f9fa;
+                }
+
+                .text-gray {
+                    color: #6c757d;
+                }
+
+                .text-dark {
+                    color: #343a40 !important;
+                    font-weight: 600;
+                }
+
+                .table-hover tbody tr:hover {
+                    background-color: rgba(0, 0, 0, 0.02);
+                }
+
+                .dropdown-menu {
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                }
+
+                .img-thumbnail {
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                }
+
+                .card-title {
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    color: #343a40;
+                }
+
+                .breadcrumb a,
+                .breadcrumb-item.active,
+                .dropdown-item,
+                .card-footer .text-gray {
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                }
+
+                .btn-outline-dark,
+                .dropdown-toggle {
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                }
+            </style>

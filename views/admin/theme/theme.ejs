@@ -1,0 +1,259 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="content-wrapper bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">Themes Management</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h3 class="card-title">All Themes</h3>
+                                    <div class="card-tools">
+                                        <a href="/admin/theme/renderAddPage" class="btn btn-sm btn-outline-dark">
+                                            <i class="fas fa-plus"></i> Add New
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <input type="text" id="searchByName" class="form-control"
+                                            placeholder="Search themes by name...">
+                                    </div>
+
+                                    <table class="table table-hover">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="text-dark">ID</th>
+                                                <th class="text-dark">Name</th>
+                                                <th class="text-dark">Slug</th>
+                                                <th class="text-dark">Description</th>
+                                                <th class="text-dark">Content Preview</th>
+                                                <th class="text-dark">Created</th>
+                                                <th class="text-dark">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="themesTableBody">
+                                            <% themes.forEach(theme=> { %>
+                                                <tr class="bg-white" data-name="<%= theme.name.toLowerCase() %>"
+                                                    id="themeRow_<%= theme.id %>">
+                                                    <td class="align-middle">
+                                                        <%= theme.id %>
+                                                    </td>
+                                                    <td class="align-middle"><strong>
+                                                            <%= theme.name %>
+                                                        </strong></td>
+                                                    <td class="align-middle text-gray">
+                                                        <%= theme.slug_title %>
+                                                    </td>
+                                                    <td class="align-middle text-gray">
+                                                        <%= theme.description %>
+                                                    </td>
+                                                    <td class="align-middle text-gray">
+                                                        <% const plainText=theme.content?.replace(/<[^>]*>/g, '') || '';
+                                                            %>
+                                                            <%= plainText.length> 30 ? plainText.substring(0, 30) +
+                                                                '...' : plainText %>
+                                                    </td>
+                                                    <td class="align-middle text-gray">
+                                                        <%= new Date(theme.created_at).toLocaleDateString() %>
+                                                    </td>
+                                                    <td class="align-middle">
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                                                type="button" data-bs-toggle="dropdown">
+                                                                Actions
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li>
+                                                                    <a class="dropdown-item text-gray"
+                                                                        href="/admin/theme/renderThemeDetail/<%= theme.id %>">
+                                                                        <i class="fas fa-eye me-2"></i> View Details
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item text-gray"
+                                                                        href="/admin/theme/renderEditPage/<%= theme.id %>">
+                                                                        <i class="fas fa-edit me-2"></i> Edit
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider">
+                                                                </li>
+                                                                <li>
+                                                                    <a class="dropdown-item text-gray delete-theme-btn"
+                                                                        href="#" data-theme-id="<%= theme.id %>"
+                                                                        data-theme-name="<%= theme.name %>">
+                                                                        <i class="fas fa-trash-alt me-2"></i> Delete
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="card-footer bg-light">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="text-gray">Showing <span id="themeCount">
+                                                <%= themes.length %>
+                                            </span> entries</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <%- include('../layout/footer') %>
+
+            <script>
+                // Search functionality
+                const searchInput = document.getElementById('searchByName');
+                searchInput.addEventListener('input', function () {
+                    const query = this.value.toLowerCase().trim();
+                    const rows = document.querySelectorAll('#themesTableBody tr');
+
+                    rows.forEach(row => {
+                        const name = row.getAttribute('data-name');
+                        row.style.display = name.includes(query) ? '' : 'none';
+                    });
+                });
+
+                // AJAX delete functionality
+                document.addEventListener('DOMContentLoaded', function () {
+                    document.querySelectorAll('.delete-theme-btn').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const themeId = this.getAttribute('data-theme-id');
+                            const themeName = this.getAttribute('data-theme-name');
+
+                            if (confirm(`Are you sure you want to delete ${themeName} theme?`)) {
+                                fetch(`/admin/theme/delete/${themeId}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    }
+                                })
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        if (data.success) {
+                                            // Remove the row from the table
+                                            const row = document.getElementById(`themeRow_${themeId}`);
+                                            if (row) {
+                                                row.remove();
+                                                // Update the count
+                                                const countElement = document.getElementById('themeCount');
+                                                if (countElement) {
+                                                    countElement.textContent = parseInt(countElement.textContent) - 1;
+                                                }
+                                            }
+                                        } else {
+                                            alert('Error deleting theme: ' + (data.message || 'Unknown error'));
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        alert('Error deleting theme');
+                                    });
+                            }
+                        });
+                    });
+                });
+            </script>
+
+            <style>
+                .bg-gray-100 {
+                    background-color: #f8f9fa;
+                }
+
+                .text-gray {
+                    color: #6c757d;
+                }
+
+                .text-dark {
+                    color: #343a40 !important;
+                    font-weight: 600;
+                }
+
+                .table-hover tbody tr:hover {
+                    background-color: rgba(0, 0, 0, 0.02);
+                }
+
+                .dropdown-menu {
+                    border: 1px solid rgba(0, 0, 0, 0.1);
+                }
+
+                .img-thumbnail {
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                }
+
+                .card-title {
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    color: #343a40;
+                }
+
+                .breadcrumb a {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+
+                .breadcrumb-item.active {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+
+                table th {
+                    font-size: 1rem;
+                    font-weight: 700;
+                }
+
+                table td {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                }
+
+                .btn-outline-dark {
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                }
+
+                .dropdown-item {
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                }
+
+                .card-footer .text-gray {
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                }
+
+                .dropdown-toggle {
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                }
+            </style>

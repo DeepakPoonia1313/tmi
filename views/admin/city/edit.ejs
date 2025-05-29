@@ -1,0 +1,233 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+        <style>
+            .ql-editor img {
+                max-width: 300px;
+                height: auto;
+            }
+
+            #image-toolbar {
+                position: absolute;
+                z-index: 1000;
+                background: #fff;
+                border: 1px solid #ccc;
+                padding: 5px 10px;
+                display: none;
+                gap: 10px;
+                border-radius: 6px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                font-size: 14px;
+                cursor: pointer;
+            }
+        </style>
+
+        <div class="container mt-4">
+            <h2 class="mb-4">Edit city</h2>
+
+            <form action="/admin/city/update/<%= city.id %>" method="POST" enctype="multipart/form-data">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <input type="hidden" name="module" value="city">
+                        <input type="hidden" name="moduleId" value="city" />
+                        <div class="mb-3">
+                            <label class="form-label">city Name</label>
+                            <input type="text" name="name" class="form-control" value="<%= city.name %>" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control"
+                                rows="4"><%= city.description %></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <div id="editor" style="height: 300px;"></div>
+                            <input type="hidden" name="content" id="content">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">state Name</label>
+                            <input type="text" class="form-control" value="<%= city.state_name || 'N/A' %>" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Upload New Image (optional)</label><br>
+
+                            <% if (city.image) { %>
+                                <div id="image-preview-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="<%= city.image %>" alt="Current Image" width="100" height="100"
+                                        class="img-thumbnail mb-2">
+
+                                    <div id="arrow" style="display: none; font-size: 24px;">→</div>
+
+                                    <img id="new-image-preview" src="#" alt="New Image Preview" width="100" height="100"
+                                        class="img-thumbnail mb-2" style="display: none;">
+                                </div>
+                                <% } %>
+
+                                    <input type="file" name="image" class="form-control" id="image-input">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meta Title</label>
+                            <input type="text" name="meta_title" class="form-control" value="<%= city.meta_title %>">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Meta Description</label>
+                            <textarea name="meta_description" class="form-control"
+                                rows="3"><%= city.meta_description %></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Created At</label>
+                            <input type="text" class="form-control"
+                                value="<%= new Date(city.created_at).toLocaleDateString() %>" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Updated At</label>
+                            <input type="text" class="form-control"
+                                value="<%= new Date(city.updated_at).toLocaleDateString() %>" readonly>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/admin/city/city" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Update city
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="image-toolbar">
+            <span data-align="left">⬅️ Left</span>
+            <span data-align="center">⬆️ Center</span>
+            <span data-align="right">➡️ Right</span>
+        </div>
+
+        <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+        <script>
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['blockquote', 'code-block'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Set initial content
+            quill.root.innerHTML = `<%- city.content %>`;
+
+            // On submit, copy to hidden input
+            document.querySelector('form').addEventListener('submit', () => {
+                document.querySelector('#content').value = quill.root.innerHTML;
+            });
+
+            // Upload image handler
+            const toolbar = quill.getModule('toolbar');
+            toolbar.addHandler('image', () => {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+                input.click();
+
+                input.onchange = async () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const res = await fetch('/upload/city/content', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!res.ok) throw new Error('Upload failed');
+
+                        const data = await res.json();
+                        const url = data.file;
+
+                        const range = quill.getSelection();
+                        const imgTag = `<img style="max-width: 300px;" src="${url}">`;
+                        quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
+                    } catch (err) {
+                        console.error('Image upload failed', err);
+                    }
+                };
+            });
+
+            // Floating image toolbar
+            const imageToolbar = document.getElementById('image-toolbar');
+
+            quill.root.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    const rect = e.target.getBoundingClientRect();
+                    imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
+                    imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
+                    imageToolbar.style.display = 'flex';
+                    imageToolbar.currentImage = e.target;
+                } else {
+                    imageToolbar.style.display = 'none';
+                }
+            });
+
+            imageToolbar.addEventListener('click', (e) => {
+                const el = imageToolbar.currentImage;
+                const align = e.target.dataset.align;
+                if (!el || !align) return;
+
+                if (align === 'left') {
+                    el.style.float = 'left';
+                    el.style.marginRight = '50px';
+                    el.style.marginLeft = '0';
+                    el.style.display = '';
+                } else if (align === 'right') {
+                    el.style.float = 'right';
+                    el.style.marginLeft = '50px';
+                    el.style.marginRight = '0';
+                    el.style.display = '';
+                } else if (align === 'center') {
+                    el.style.float = '';
+                    el.style.marginLeft = 'auto';
+                    el.style.marginRight = 'auto';
+                    el.style.display = 'block';
+                }
+
+                imageToolbar.style.display = 'none';
+            });
+        </script>
+        <script>
+            const imageInput = document.getElementById('image-input');
+            const newImagePreview = document.getElementById('new-image-preview');
+            const arrow = document.getElementById('arrow');
+
+            imageInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        newImagePreview.src = event.target.result;
+                        newImagePreview.style.display = 'block';
+                        arrow.style.display = 'inline-block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    newImagePreview.style.display = 'none';
+                    arrow.style.display = 'none';
+                }
+            });
+        </script>
+
+        <%- include('../layout/footer') %>

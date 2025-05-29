@@ -1,0 +1,390 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+
+        <style>
+            .editor-container {
+                border-radius: 0.5rem;
+                border: 1px solid #ced4da;
+                overflow: hidden;
+            }
+
+            .ql-toolbar {
+                border-top-left-radius: 0.5rem;
+                border-top-right-radius: 0.5rem;
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #ced4da !important;
+            }
+
+            .ql-container {
+                border-bottom-left-radius: 0.5rem;
+                border-bottom-right-radius: 0.5rem;
+                height: 300px;
+                font-family: inherit;
+            }
+
+            .ql-editor {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            .ql-editor img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 0.25rem;
+            }
+
+            #image-toolbar {
+                position: absolute;
+                z-index: 1000;
+                background: white;
+                border: 1px solid #dee2e6;
+                padding: 0.5rem;
+                display: none;
+                gap: 0.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                font-size: 0.875rem;
+            }
+
+            #image-toolbar span {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            #image-toolbar span:hover {
+                background-color: #f1f1f1;
+            }
+
+            .img-preview-container {
+                position: relative;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+
+            .img-preview {
+                max-width: 300px;
+                max-height: 200px;
+                border-radius: 0.5rem;
+                border: 1px solid #dee2e6;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+
+            .remove-image {
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background-color: #dc3545;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                font-size: 12px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .form-section {
+                background-color: white;
+                border-radius: 0.5rem;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+
+            .form-section h5 {
+                color: #3a7bd5;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+                margin-bottom: 1.5rem;
+            }
+
+            .file-upload {
+                position: relative;
+                overflow: hidden;
+            }
+
+            .file-upload-input {
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+                width: 100%;
+                height: 100%;
+                cursor: pointer;
+            }
+
+            .file-upload-label {
+                display: block;
+                padding: 0.5rem 1rem;
+                background-color: #f8f9fa;
+                border: 1px dashed #ced4da;
+                border-radius: 0.5rem;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .file-upload-label:hover {
+                background-color: #e9ecef;
+            }
+
+            @media (max-width: 768px) {
+                .img-preview {
+                    max-width: 100%;
+                }
+            }
+        </style>
+
+        <div class="container my-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light p-2 rounded">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="fas fa-home me-1"></i>
+                            Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/region/region"><i
+                                class="fas fa-map-marked-alt me-1"></i> Regions</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-edit me-1"></i> Edit Region
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Edit Region</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/admin/region/update" enctype="multipart/form-data">
+                        <input type="hidden" name="id" value="<%= region.id %>">
+                        <input type="hidden" name="module" value="region">
+                        <input type="hidden" name="moduleId" value="region">
+
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-info-circle me-2"></i> Basic Information</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Region Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name"
+                                        value="<%= region.name %>" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="description" class="form-label">Short Description</label>
+                                    <input type="text" class="form-control" id="description" name="description"
+                                        value="<%= region.description %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-search me-2"></i> SEO Settings</h5>
+                            <div class="mb-3">
+                                <label for="meta_title" class="form-label">Meta Title</label>
+                                <input type="text" class="form-control" id="meta_title" name="meta_title"
+                                    value="<%= region.meta_title %>">
+                                <small class="text-muted">Recommended: 50-60 characters</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="meta_description" class="form-label">Meta Description</label>
+                                <textarea class="form-control" id="meta_description" name="meta_description"
+                                    rows="2"><%= region.meta_description %></textarea>
+                                <small class="text-muted">Recommended: 150-160 characters</small>
+                            </div>
+                        </div>
+
+                        <!-- Image Section -->
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-image me-2"></i> Region Image</label><br>
+
+                            <% if (region.image) { %>
+                                <div id="image-preview-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                    <!-- Current Image -->
+                                    <img src="<%= region.image %>" alt="Current Image" width="100" height="100"
+                                        class="img-thumbnail mb-2">
+
+                                    <!-- Arrow -->
+                                    <div id="arrow-pointer" style="display: none; font-size: 24px;">→</div>
+
+                                    <!-- New Image Preview -->
+                                    <img id="new-image-preview" src="#" alt="New Image Preview" width="100" height="100"
+                                        class="img-thumbnail mb-2" style="display: none;">
+                                </div>
+
+                                <!-- Hidden remove checkbox (optional if used elsewhere) -->
+                                <input type="checkbox" id="remove-image-checkbox" name="remove_image"
+                                    style="display: none;">
+                                <% } else { %>
+                                    <!-- New Image Preview (for first-time upload) -->
+                                    <div id="new-image-preview-container" style="display: none;">
+                                        <img id="new-image-preview" src="#" alt="New Image Preview" width="100"
+                                            height="100" class="img-thumbnail mb-2">
+                                    </div>
+                                    <% } %>
+
+                                        <div class="file-upload mt-2">
+                                            <label for="image-input" class="file-upload-label">
+                                                <i class="fas fa-cloud-upload-alt me-2"></i>
+                                                <%= region.image ? 'Change Image' : 'Upload Image' %>
+                                            </label>
+                                            <input type="file" id="image-input" name="image" class="file-upload-input"
+                                                accept="image/*" style="display: none;">
+                                        </div>
+
+                                        <small class="text-muted d-block mt-1">Recommended size: 1200x800px
+                                            (JPG/PNG)</small>
+                        </div>
+
+
+                        <!-- Content Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-align-left me-2"></i> Region Content</h5>
+                            <div class="editor-container mb-3">
+                                <!-- Quill editor will be inserted here -->
+                                <div id="editor"><%- region.content %></div>
+                            </div>
+                            <input type="hidden" name="content" id="content">
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/admin/region/region" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating Image Toolbar -->
+        <div id="image-toolbar">
+            <span data-align="left">⬅️ Left</span>
+            <span data-align="center">⬆️ Center</span>
+            <span data-align="right">➡️ Right</span>
+        </div>
+
+        <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+        <script>
+            document.getElementById('image-input')?.addEventListener('change', function (e) {
+                const preview = document.getElementById('new-image-preview');
+                const arrow = document.getElementById('arrow-pointer') || document.getElementById('arrow');
+                const file = e.target.files[0];
+
+                if (file && preview) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        if (arrow) arrow.style.display = 'inline';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        </script>
+
+        <script>
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['blockquote', 'code-block'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Set initial content
+            quill.root.innerHTML = `<%- region.content %>`;
+
+            // On submit, copy to hidden input
+            document.querySelector('form').addEventListener('submit', () => {
+                document.querySelector('#content').value = quill.root.innerHTML;
+            });
+
+            // Upload image handler
+            const toolbar = quill.getModule('toolbar');
+            toolbar.addHandler('image', () => {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+                input.click();
+
+                input.onchange = async () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const res = await fetch('/upload/region/content', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!res.ok) throw new Error('Upload failed');
+
+                        const data = await res.json();
+                        const url = data.file;
+
+                        const range = quill.getSelection();
+                        const imgTag = `<img style="max-width: 300px;" src="${url}">`;
+                        quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
+                    } catch (err) {
+                        console.error('Image upload failed', err);
+                    }
+                };
+            });
+
+            // Floating image toolbar
+            const imageToolbar = document.getElementById('image-toolbar');
+
+            quill.root.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    const rect = e.target.getBoundingClientRect();
+                    imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
+                    imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
+                    imageToolbar.style.display = 'flex';
+                    imageToolbar.currentImage = e.target;
+                } else {
+                    imageToolbar.style.display = 'none';
+                }
+            });
+
+            imageToolbar.addEventListener('click', (e) => {
+                const el = imageToolbar.currentImage;
+                const align = e.target.dataset.align;
+                if (!el || !align) return;
+
+                if (align === 'left') {
+                    el.style.float = 'left';
+                    el.style.marginRight = '50px';
+                    el.style.marginLeft = '0';
+                    el.style.display = '';
+                } else if (align === 'right') {
+                    el.style.float = 'right';
+                    el.style.marginLeft = '50px';
+                    el.style.marginRight = '0';
+                    el.style.display = '';
+                } else if (align === 'center') {
+                    el.style.float = '';
+                    el.style.marginLeft = 'auto';
+                    el.style.marginRight = 'auto';
+                    el.style.display = 'block';
+                }
+
+                imageToolbar.style.display = 'none';
+            });
+        </script>
+        <%- include('../layout/footer') %>

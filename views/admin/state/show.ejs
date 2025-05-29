@@ -1,0 +1,100 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+        <style>
+            .content-box {
+                max-height: 400px;
+                overflow: auto;
+                border: 1px solid #dee2e6;
+                padding: 15px;
+                border-radius: 0.5rem;
+                background-color: #f8f9fa;
+                font-size: 0.875rem;
+                /* slightly smaller */
+            }
+        </style>
+        <div class="container mt-4">
+            <h2 class="mb-4">State Details</h2>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <%= state.name %>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">ID:</div>
+                        <div class="col-md-9">
+                            <%= state.id %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">State Name:</div>
+                        <div class="col-md-9">
+                            <%= state.name %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Description:</div>
+                        <div class="col-md-9">
+                            <%= state.description %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Region:</div>
+                        <div class="col-md-9">
+                            <%= state.region_name || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Image:</div>
+                        <div class="col-md-9">
+                            <% if (state.image) { %>
+                                <img src="<%= state.image %>" alt="State Image" class="img-fluid img-thumbnail"
+                                    style="max-width: 200px;">
+                                <% } else { %>
+                                    <span class="text-muted">No image available</span>
+                                    <% } %>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Content:</strong>
+                        <div class="content-box">
+                            <%- state.content %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Meta Title:</div>
+                        <div class="col-md-9">
+                            <%= state.meta_title || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Meta Description:</div>
+                        <div class="col-md-9">
+                            <%= state.meta_description || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Created At:</div>
+                        <div class="col-md-9">
+                            <%= new Date(state.created_at).toLocaleDateString() %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Updated At:</div>
+                        <div class="col-md-9">
+                            <%= new Date(state.updated_at).toLocaleDateString() %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="/admin/state/state" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+        <%- include('../layout/footer') %>

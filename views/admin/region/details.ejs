@@ -1,0 +1,214 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <style>
+            .detail-card {
+                border-radius: 0.5rem;
+                overflow: hidden;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+
+            .detail-card-header {
+                background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+                padding: 1rem 1.5rem;
+                border-bottom: none;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 0.25rem;
+            }
+
+            .detail-value {
+                background-color: #f8f9fa;
+                border-radius: 0.25rem;
+                padding: 0.5rem 0.75rem;
+                margin-bottom: 1rem;
+                min-height: 38px;
+            }
+
+            .content-box {
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid #dee2e6;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                background-color: #f8f9fa;
+                font-size: 0.875rem;
+            }
+
+            .content-box img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .img-preview {
+                max-width: 100%;
+                height: auto;
+                border-radius: 0.25rem;
+                border: 1px solid #dee2e6;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+
+            .action-btns .btn {
+                min-width: 120px;
+            }
+
+            .breadcrumb-item a {
+                color: #3a7bd5;
+                text-decoration: none;
+            }
+
+            @media (max-width: 768px) {
+                .detail-value {
+                    margin-bottom: 0.75rem;
+                }
+
+                .content-box {
+                    max-height: 300px;
+                }
+            }
+        </style>
+
+        <div class="container mt-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb small px-2 py-2 bg-light rounded">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="fas fa-home me-1"></i>
+                            Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/region/region"><i
+                                class="fas fa-map-marked-alt me-1"></i> Regions</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-info-circle me-1"></i>
+                        Details</li>
+                </ol>
+            </nav>
+
+            <div class="card detail-card mb-4">
+                <div class="card-header detail-card-header text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Region Details</h5>
+                        <span class="badge bg-light text-dark">ID: <%= region.id %></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-tag me-1"></i> Name</div>
+                                <div class="detail-value">
+                                    <%= region.name %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-align-left me-1"></i> Description</div>
+                                <div class="detail-value">
+                                    <%= region.description || '<span class="text-muted">No description</span>' %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-image me-1"></i> Image</div>
+                                <div class="detail-value">
+                                    <% if (region.image) { %>
+                                        <img src="<%= region.image %>" alt="Region Image" class="img-preview">
+                                        <% } else { %>
+                                            <span class="text-muted">No image available</span>
+                                            <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-heading me-1"></i> Meta Title</div>
+                                <div class="detail-value">
+                                    <%= region.meta_title || '<span class="text-muted">Not specified</span>' %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-paragraph me-1"></i> Meta Description</div>
+                                <div class="detail-value">
+                                    <%= region.meta_description || '<span class="text-muted">Not specified</span>' %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-calendar-alt me-1"></i> Timestamps</div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Created</small>
+                                        <div class="detail-value">
+                                            <i class="far fa-calendar-plus me-1"></i>
+                                            <%= new Date(region.created_at).toLocaleString() %>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted">Updated</small>
+                                        <div class="detail-value">
+                                            <i class="far fa-calendar-check me-1"></i>
+                                            <%= new Date(region.updated_at).toLocaleString() %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Width Content -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="detail-label"><i class="fas fa-file-alt me-1"></i> Content</div>
+                            <div class="content-box">
+                                <%- region.content || '<span class="text-muted">No content available</span>' %>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row mt-4">
+                        <div class="col-12 action-btns">
+                            <a href="/admin/region/renderEditPage/<%= region.id %>" class="btn btn-warning">
+                                <i class="fas fa-edit me-1"></i> Edit Region
+                            </a>
+                            <a href="/admin/region/region" class="btn btn-secondary ms-2">
+                                <i class="fas fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash-alt me-1"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the region "<strong>
+                                <%= region.name %>
+                            </strong>"?</p>
+                        <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>This action cannot be
+                            undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <a href="/admin/region/delete/<%= region.id %>" class="btn btn-danger">Delete Region</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../layout/footer') %>

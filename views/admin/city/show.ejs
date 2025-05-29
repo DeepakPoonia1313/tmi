@@ -1,0 +1,100 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+        <style>
+            .content-box {
+                max-height: 400px;
+                overflow: auto;
+                border: 1px solid #dee2e6;
+                padding: 15px;
+                border-radius: 0.5rem;
+                background-color: #f8f9fa;
+                font-size: 0.875rem;
+                /* slightly smaller */
+            }
+        </style>
+        <div class="container mt-4">
+            <h2 class="mb-4">city Details</h2>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <%= city.name %>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">ID:</div>
+                        <div class="col-md-9">
+                            <%= city.id %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">city Name:</div>
+                        <div class="col-md-9">
+                            <%= city.name %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Description:</div>
+                        <div class="col-md-9">
+                            <%= city.description %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">state:</div>
+                        <div class="col-md-9">
+                            <%= city.state_name || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Image:</div>
+                        <div class="col-md-9">
+                            <% if (city.image) { %>
+                                <img src="<%= city.image %>" alt="city Image" class="img-fluid img-thumbnail"
+                                    style="max-width: 200px;">
+                                <% } else { %>
+                                    <span class="text-muted">No image available</span>
+                                    <% } %>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Content:</strong>
+                        <div class="content-box">
+                            <%- city.content %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Meta Title:</div>
+                        <div class="col-md-9">
+                            <%= city.meta_title || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Meta Description:</div>
+                        <div class="col-md-9">
+                            <%= city.meta_description || 'N/A' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Created At:</div>
+                        <div class="col-md-9">
+                            <%= new Date(city.created_at).toLocaleDateString() %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3 font-weight-bold">Updated At:</div>
+                        <div class="col-md-9">
+                            <%= new Date(city.updated_at).toLocaleDateString() %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a href="/admin/city/city" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+        <%- include('../layout/footer') %>

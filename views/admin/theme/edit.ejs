@@ -1,0 +1,350 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <style>
+            .ql-editor img {
+                max-width: 300px;
+                height: auto;
+            }
+
+            #image-toolbar {
+                position: absolute;
+                z-index: 1000;
+                background: #fff;
+                border: 1px solid #ccc;
+                padding: 5px 10px;
+                display: none;
+                gap: 10px;
+                border-radius: 6px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+                font-size: 14px;
+                cursor: pointer;
+            }
+
+            .editor-container {
+                border-radius: 0.5rem;
+                border: 1px solid #ced4da;
+                overflow: hidden;
+            }
+
+            .ql-toolbar {
+                border-top-left-radius: 0.5rem;
+                border-top-right-radius: 0.5rem;
+                background-color: #f8f9fa;
+                border-bottom: 1px solid #ced4da !important;
+            }
+
+            .ql-container {
+                border-bottom-left-radius: 0.5rem;
+                border-bottom-right-radius: 0.5rem;
+                height: 300px;
+                font-family: inherit;
+            }
+
+            .ql-editor {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            .ql-editor img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 0.25rem;
+            }
+
+            #image-toolbar {
+                position: absolute;
+                z-index: 1000;
+                background: white;
+                border: 1px solid #dee2e6;
+                padding: 0.5rem;
+                display: none;
+                gap: 0.5rem;
+                border-radius: 0.5rem;
+                box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+                font-size: 0.875rem;
+            }
+
+            #image-toolbar span {
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            #image-toolbar span:hover {
+                background-color: #f1f1f1;
+            }
+
+            .form-section {
+                background-color: white;
+                border-radius: 0.5rem;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            }
+
+            .form-section h5 {
+                color: #3a7bd5;
+                padding-bottom: 0.5rem;
+                border-bottom: 1px solid #eee;
+                margin-bottom: 1.5rem;
+            }
+        </style>
+
+        <div class="container my-4">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light p-2 rounded">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="fas fa-home me-1"></i>
+                            Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/theme"><i class="fas fa-palette me-1"></i> Themes</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-edit me-1"></i> Edit Theme
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-palette me-2"></i> Edit Theme</h4>
+                </div>
+                <div class="card-body">
+                    <form action="/admin/theme/update/<%= theme.id %>" method="POST" enctype="multipart/form-data">
+                        <!-- Basic Information -->
+                        <input type="hidden" name="module" value="theme">
+                        <input type="hidden" name="moduleId" value="theme" />
+                        <div class="form-section">
+                            <h5><i class="fas fa-info-circle me-2"></i> Basic Information</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Theme Name *</label>
+                                    <input type="text" name="name" class="form-control" value="<%= theme.name %>"
+                                        required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Slug <span class="text-danger">*</span></label>
+                                    <select name="slug" class="form-select" required>
+                                        <option value="" disabled>Select a slug</option>
+                                        <% slugs.forEach(slug=> { %>
+                                            <option value="<%= slug.id %>" <%=slug.id===theme.slug ? 'selected' : '' %>>
+                                                <%= slug.title %>
+                                            </option>
+                                            <% }) %>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Short Description</label>
+                                    <textarea name="description" class="form-control"
+                                        rows="3"><%= theme.description %></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Upload New Image (optional)</label><br>
+
+                            <% if (theme.image) { %>
+                                <div id="image-preview-wrapper" style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="<%= theme.image %>" alt="Current Image" width="100" height="100"
+                                        class="img-thumbnail mb-2">
+
+                                    <div id="arrow" style="display: none; font-size: 24px;">→</div>
+
+                                    <img id="new-image-preview" src="#" alt="New Image Preview" width="100" height="100"
+                                        class="img-thumbnail mb-2" style="display: none;">
+                                </div>
+                                <% } %>
+
+                                    <input type="file" name="image" class="form-control" id="image-input">
+                        </div>
+
+                        <!-- Content Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-align-left me-2"></i> Theme Content</h5>
+                            <div class="editor-container">
+                                <div id="editor" style="height: 300px;">
+                                    <%= theme.content %>
+                                </div>
+                            </div>
+                            <input type="hidden" name="content" id="content">
+                        </div>
+
+                        <!-- SEO Meta Section -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-search me-2"></i> SEO Settings</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Meta Title</label>
+                                <input type="text" name="meta_title" class="form-control"
+                                    value="<%= theme.meta_title %>">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Meta Description</label>
+                                <textarea name="meta_description" class="form-control"
+                                    rows="2"><%= theme.meta_description %></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Meta Keywords</label>
+                                <textarea name="meta_keywords" class="form-control"
+                                    rows="2"><%= theme.meta_keywords %></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Timestamps -->
+                        <div class="form-section">
+                            <h5><i class="fas fa-clock me-2"></i> Timestamps</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Created At</label>
+                                    <input type="text" class="form-control"
+                                        value="<%= new Date(theme.created_at).toLocaleDateString() %>" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Updated At</label>
+                                    <input type="text" class="form-control"
+                                        value="<%= new Date(theme.updated_at).toLocaleDateString() %>" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="/admin/theme/theme" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Update Theme
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="image-toolbar">
+            <span data-align="left">⬅️ Left</span>
+            <span data-align="center">⬆️ Center</span>
+            <span data-align="right">➡️ Right</span>
+        </div>
+
+        <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+        <script>
+            const quill = new Quill('#editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{ header: [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['blockquote', 'code-block'],
+                        [{ list: 'ordered' }, { list: 'bullet' }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // Set initial content
+            quill.root.innerHTML = `<%- theme.content %>`;
+
+            // On submit, copy to hidden input
+            document.querySelector('form').addEventListener('submit', () => {
+                document.querySelector('#content').value = quill.root.innerHTML;
+            });
+
+            // Upload image handler
+            const toolbar = quill.getModule('toolbar');
+            toolbar.addHandler('image', () => {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+                input.click();
+
+                input.onchange = async () => {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    try {
+                        const res = await fetch('/upload/theme/content', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!res.ok) throw new Error('Upload failed');
+
+                        const data = await res.json();
+                        const url = data.file;
+
+                        const range = quill.getSelection();
+                        const imgTag = `<img style="max-width: 300px;" src="${url}">`;
+                        quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
+                    } catch (err) {
+                        console.error('Image upload failed', err);
+                    }
+                };
+            });
+
+            // Floating image toolbar
+            const imageToolbar = document.getElementById('image-toolbar');
+
+            quill.root.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IMG') {
+                    const rect = e.target.getBoundingClientRect();
+                    imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
+                    imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
+                    imageToolbar.style.display = 'flex';
+                    imageToolbar.currentImage = e.target;
+                } else {
+                    imageToolbar.style.display = 'none';
+                }
+            });
+
+            imageToolbar.addEventListener('click', (e) => {
+                const el = imageToolbar.currentImage;
+                const align = e.target.dataset.align;
+                if (!el || !align) return;
+
+                if (align === 'left') {
+                    el.style.float = 'left';
+                    el.style.marginRight = '50px';
+                    el.style.marginLeft = '0';
+                    el.style.display = '';
+                } else if (align === 'right') {
+                    el.style.float = 'right';
+                    el.style.marginLeft = '50px';
+                    el.style.marginRight = '0';
+                    el.style.display = '';
+                } else if (align === 'center') {
+                    el.style.float = '';
+                    el.style.marginLeft = 'auto';
+                    el.style.marginRight = 'auto';
+                    el.style.display = 'block';
+                }
+
+                imageToolbar.style.display = 'none';
+            });
+        </script>
+        <script>
+            const imageInput = document.getElementById('image-input');
+            const newImagePreview = document.getElementById('new-image-preview');
+            const arrow = document.getElementById('arrow');
+
+            imageInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        newImagePreview.src = event.target.result;
+                        newImagePreview.style.display = 'block';
+                        arrow.style.display = 'inline-block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    newImagePreview.style.display = 'none';
+                    arrow.style.display = 'none';
+                }
+            });
+        </script>
+
+        <%- include('../layout/footer') %>

@@ -1,0 +1,215 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="content-wrapper bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">City Management</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">All Cities</h3>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form method="get" action="/admin/city/city" class="d-flex" id="searchForm">
+                                            <input type="text" name="search" class="form-control form-control-sm me-2"
+                                                placeholder="Search by name" value="<%= search %>" />
+                                            <button class="btn btn-sm btn-outline-dark" type="submit">Search</button>
+                                        </form>
+                                        <a href="/admin/city/renderAddPage" class="btn btn-sm btn-outline-dark ms-2">
+                                            <i class="fas fa-plus"></i> Add New
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card-body table-responsive" id="city-table-container">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="text-dark">ID</th>
+                                                <th class="text-dark">City</th>
+                                                <th class="text-dark">Description</th>
+                                                <th class="text-dark">State</th>
+                                                <th class="text-dark">Image</th>
+                                                <th class="text-dark">Meta Title</th>
+                                                <th class="text-dark">Updated</th>
+                                                <th class="text-dark">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% city.forEach(city=> { %>
+                                                <tr class="bg-white">
+                                                    <td>
+                                                        <%= city.id %>
+                                                    </td>
+                                                    <td><strong>
+                                                            <%= city.name %>
+                                                        </strong></td>
+                                                    <td class="text-gray">
+                                                        <%= city.description || '' %>
+                                                    </td>
+                                                    <td>
+                                                        <%= city.state_name %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (city.image) { %>
+                                                            <img src="<%= city.image %>" class="img-thumbnail"
+                                                                style="max-height: 40px; max-width: 60px;" />
+                                                            <% } else { %>
+                                                                <span class="text-gray">No image</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <%= city.meta_title || '' %>
+                                                    </td>
+                                                    <td class="text-gray">
+                                                        <%= new Date(city.updated_at).toLocaleDateString() %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                                                data-bs-toggle="dropdown">Actions</button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/city/rendercityDetail/<%= city.id %>">
+                                                                        <i class="fas fa-eye me-2"></i> View
+                                                                    </a></li>
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/city/renderEditPage/<%= city.id %>">
+                                                                        <i class="fas fa-edit me-2"></i> Edit
+                                                                    </a></li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider" />
+                                                                </li>
+                                                                <li><a class="dropdown-item text-danger"
+                                                                        href="/admin/city/delete/<%= city.id %>"
+                                                                        onclick="return confirm('Are you sure you want to delete this city?');">
+                                                                        <i class="fas fa-trash me-2"></i> Delete
+                                                                    </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Pagination Footer -->
+                                    <div class="card-footer bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="text-gray">
+                                                Showing <%= city.length %> of <%= total %> entries
+                                            </div>
+                                            <ul class="pagination pagination-sm mb-0">
+                                                <% for (let i=1; i <=totalPages; i++) { %>
+                                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/admin/city/city?page=<%= i %>&search=<%= search %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <%- include('../layout/footer') %>
+
+            <script>
+                // Fetch and update city list
+                function fetchCities(page = 1, search = '') {
+                    const params = new URLSearchParams({ page, search });
+                    fetch(`/admin/city/city?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            renderTable(data.city);
+                            renderPagination(data.totalPages, data.currentPage, data.search);
+                            updateShowingText(data.city.length, data.total);
+                        })
+                        .catch(err => console.error('Error:', err));
+                }
+
+                // Render table body rows dynamically
+                function renderTable(cities) {
+                    const tbody = cities.map(city => `
+            <tr class="bg-white">
+                <td>${city.id}</td>
+                <td><strong>${city.name}</strong></td>
+                <td class="text-gray">${city.description || ''}</td>
+                <td>${city.state_name}</td>
+                <td>${city.image
+                            ? `<img src="${city.image}" class="img-thumbnail" style="max-height: 40px; max-width: 60px;" />`
+                            : `<span class="text-gray">No image</span>`}
+                </td>
+                <td>${city.meta_title || ''}</td>
+                <td class="text-gray">${new Date(city.updated_at).toLocaleDateString()}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown">Actions</button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item text-gray" href="/admin/city/rendercityDetail/${city.id}">
+                                <i class="fas fa-eye me-2"></i> View
+                            </a></li>
+                            <li><a class="dropdown-item text-gray" href="/admin/city/renderEditPage/${city.id}">
+                                <i class="fas fa-edit me-2"></i> Edit
+                            </a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item text-danger" href="/admin/city/delete/${city.id}" 
+                                onclick="return confirm('Are you sure you want to delete this city?');">
+                                <i class="fas fa-trash me-2"></i> Delete
+                            </a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+                    document.querySelector('#city-table-container tbody').innerHTML = tbody;
+                }
+
+                // Render pagination buttons dynamically
+                function renderPagination(totalPages, currentPage, search) {
+                    let paginationHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="fetchCities(${i}, '${search}')">${i}</a>
+                </li>`;
+                    }
+                    document.querySelector('#city-table-container .pagination').innerHTML = paginationHTML;
+                }
+
+                // Update the "Showing X of Y entries" text dynamically
+                function updateShowingText(currentCount, total) {
+                    const textDiv = document.querySelector('.card-footer .text-gray');
+                    if (textDiv) {
+                        textDiv.textContent = `Showing ${currentCount} of ${total} entries`;
+                    }
+                }
+
+                // Intercept form submit and fetch via AJAX
+                document.getElementById('searchForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const search = this.search.value.trim();
+                    fetchCities(1, search);
+                });
+            </script>
