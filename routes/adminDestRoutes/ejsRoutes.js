@@ -3,6 +3,27 @@ import bcrypt from 'bcrypt';
 import db from '../../db.js'; // Adjust the path as necessary
 import isAdmin from '../../middleware/adminMiddleware.js';
 import jwt from "jsonwebtoken";
+import fs from 'fs/promises';
+import path from 'path';
+
+export const getAllImages = async (dir, root = dir) => {
+    let images = [];
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            const subImages = await getAllImages(fullPath, root);
+            images.push(...subImages);
+        } else if (entry.isFile() && /\.(png|jpe?g|webp|gif)$/i.test(entry.name)) {
+            // Create relative path for the browser, e.g., uploads/city/content/image.jpg
+            const relativePath = path.relative(path.join(root, '..'), fullPath).replace(/\\/g, '/');
+            images.push(`/${relativePath}`);
+        }
+    }
+
+    return images;
+};
 
 
 const router = express.Router();
@@ -18,82 +39,171 @@ router.get('/region/region', isAdmin, async (req, res) => {
     }
 })
 
+// router.get('/region/renderEditPage/:id', isAdmin, async (req, res) => {
+//     const id = req.params.id;
+//     // const id = 1;
+//     try {
+//         const [rows] = await db.query(`SELECT * FROM region WHERE id = ?`, [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "Region not found" });
+//         }
+//         res.render('admin/region/edit', { region: rows[0] });
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+//     // res.render('admin/region/edit', { region: result.rows[0] });
+// })
 router.get('/region/renderEditPage/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
-    // const id = 1;
     try {
-        const [rows] = await db.query(`SELECT * FROM region WHERE id = ?`, [id]);
+        const [rows] = await db.query(`
+            SELECT region.*, metadata.meta_title, metadata.meta_description, metadata.meta_keywords
+            FROM region
+            LEFT JOIN metadata ON metadata.module = 'region' AND metadata.module_id = region.id
+            WHERE region.id = ?
+        `, [id]);
+
         if (rows.length === 0) {
             return res.status(404).send({ message: "Region not found" });
         }
-        res.render('admin/region/edit', { region: rows[0] });
+
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
+
+        res.render('admin/region/edit', {
+            region: rows[0],
+            images: allImages,
+        });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-    // res.render('admin/region/edit', { region: result.rows[0] });
-})
-
-router.get('/region/renderAddPage', isAdmin, (req, res) => {
-    res.render('admin/region/add', {
-        breadcrumbs: [
-            { label: 'Dashboard', url: '/admin/dashboard' },
-            { label: 'Regions', url: '/admin/region/region' },
-            { label: 'Add Region' }
-        ]
-    });
 });
 
+
+router.get('/region/renderAddPage', isAdmin, async (req, res) => {
+    try {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
+
+        res.render('admin/region/add', {
+            breadcrumbs: [
+                { label: 'Dashboard', url: '/admin/dashboard' },
+                { label: 'Regions', url: '/admin/region/region' },
+                { label: 'Add Region' }
+            ],
+            images: allImages,
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Error fetching data" });
+    }
+});
+
+// router.get('/region/renderRegionDetail/:id', isAdmin, async (req, res) => {
+//     const id = req.params.id;
+//     // const id = 1;
+//     try {
+//         const [rows] = await db.query(`SELECT * FROM region WHERE id = ?`, [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "Region not found" });
+//         }
+//         res.render('admin/region/details', { region: rows[0] });
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+// })
 router.get('/region/renderRegionDetail/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
-    // const id = 1;
     try {
-        const [rows] = await db.query(`SELECT * FROM region WHERE id = ?`, [id]);
+        const [rows] = await db.query(`
+            SELECT region.*, metadata.meta_title, metadata.meta_description, metadata.meta_keywords
+            FROM region
+            LEFT JOIN metadata ON metadata.module = 'region' AND metadata.module_id = region.id
+            WHERE region.id = ?
+        `, [id]);
+        console.log("metadata table data => ", rows);
         if (rows.length === 0) {
             return res.status(404).send({ message: "Region not found" });
         }
+
         res.render('admin/region/details', { region: rows[0] });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-})
+});
+
 
 
 // state routes
 
 router.get('/state/renderAddPage', isAdmin, async (req, res) => {
     const [regions] = await db.query('SELECT * FROM region');
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    const allImages = await getAllImages(uploadsDir);
     res.render('admin/state/add', {
         breadcrumbs: [
             { label: 'Dashboard', url: '/admin/dashboard' },
             { label: 'States', url: '/admin/state/state' },
             { label: 'Add State' }
         ],
-        regions: regions
+        regions: regions,
+        images: allImages
     });
 
 })
 
+// router.get('/state/renderStateDetail/:id', isAdmin, async (req, res) => {
+//     const id = req.params.id;
+//     // const id = 1;
+//     try {
+//         const [rows] = await db.query(
+//             `SELECT state.*, region.name AS region_name 
+//              FROM state 
+//              LEFT JOIN region ON state.region_id = region.id 
+//              WHERE state.id = ?`,
+//             [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "State not found" });
+//         }
+//         res.render('admin/state/show', { state: rows[0] });
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+// })
 router.get('/state/renderStateDetail/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
-    // const id = 1;
+
     try {
         const [rows] = await db.query(
-            `SELECT state.*, region.name AS region_name 
+            `SELECT 
+                state.*, 
+                region.name AS region_name,
+                metadata.meta_title,
+                metadata.meta_description,
+                metadata.meta_keywords
              FROM state 
              LEFT JOIN region ON state.region_id = region.id 
+             LEFT JOIN metadata ON metadata.module = 'state' AND metadata.module_id = state.id
              WHERE state.id = ?`,
             [id]);
+
         if (rows.length === 0) {
             return res.status(404).send({ message: "State not found" });
         }
+
         res.render('admin/state/show', { state: rows[0] });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-})
+});
+
 
 router.get('/state/state', isAdmin, async (req, res) => {
     try {
@@ -109,31 +219,73 @@ router.get('/state/state', isAdmin, async (req, res) => {
     }
 });
 
+// router.get('/state/renderEditPage/:id', isAdmin, async (req, res) => {
+//     // const id = 1;
+//     const id = req.params.id;
+//     try {
+//         const [rows] = await db.query(
+//             `SELECT state.*, region.name AS region_name
+//              FROM state
+//              LEFT JOIN region ON state.region_id = region.id
+//              WHERE state.id = ?`,
+//             [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "State not found" });
+//         }
+//         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+//         const allImages = await getAllImages(uploadsDir);
+//         res.render('admin/state/edit',
+//             {
+//                 state: rows[0],
+//                 images: allImages,
+//             }
+//         );
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+// })
+
+// city routes
 router.get('/state/renderEditPage/:id', isAdmin, async (req, res) => {
-    // const id = 1;
     const id = req.params.id;
+
     try {
         const [rows] = await db.query(
-            `SELECT state.*, region.name AS region_name
+            `SELECT 
+                state.*, 
+                region.name AS region_name,
+                metadata.meta_title,
+                metadata.meta_description,
+                metadata.meta_keywords
              FROM state
              LEFT JOIN region ON state.region_id = region.id
+             LEFT JOIN metadata ON metadata.module = 'state' AND metadata.module_id = state.id
              WHERE state.id = ?`,
             [id]);
+
         if (rows.length === 0) {
             return res.status(404).send({ message: "State not found" });
         }
-        res.render('admin/state/edit',
-            { state: rows[0] }
-        );
+
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
+
+        res.render('admin/state/edit', {
+            state: rows[0],
+            images: allImages,
+        });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-})
+});
 
-// city routes
+
 router.get('/city/renderAddPage', isAdmin, async (req, res) => {
     const [states] = await db.query('SELECT * FROM state');
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+    const allImages = await getAllImages(uploadsDir);
     console.log(states);
     res.render('admin/city/add', {
         breadcrumbs: [
@@ -141,44 +293,58 @@ router.get('/city/renderAddPage', isAdmin, async (req, res) => {
             { label: 'city', url: '/admin/city/city' },
             { label: 'Add city' }
         ],
-        states: states
+        states: states,
+        images: allImages
     });
 
 })
 
+// router.get('/city/rendercityDetail/:id', isAdmin, async (req, res) => {
+//     const id = req.params.id;
+//     // const id = 1;
+//     try {
+//         const [rows] = await db.query(
+//             `SELECT city.*, state.name AS state_name 
+//              FROM city 
+//              LEFT JOIN state ON city.state_id = state.id 
+//              WHERE city.id = ?`,
+//             [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "city not found" });
+//         }
+//         res.render('admin/city/show', { city: rows[0] });
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+// })
 router.get('/city/rendercityDetail/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
-    // const id = 1;
+
     try {
         const [rows] = await db.query(
-            `SELECT city.*, state.name AS state_name 
+            `SELECT 
+                city.*, 
+                state.name AS state_name,
+                metadata.meta_title,
+                metadata.meta_description,
+                metadata.meta_keywords
              FROM city 
              LEFT JOIN state ON city.state_id = state.id 
+             LEFT JOIN metadata ON metadata.module = 'city' AND metadata.module_id = city.id
              WHERE city.id = ?`,
             [id]);
+
         if (rows.length === 0) {
-            return res.status(404).send({ message: "city not found" });
+            return res.status(404).send({ message: "City not found" });
         }
+
         res.render('admin/city/show', { city: rows[0] });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-})
-
-// router.get('/city/city', isAdmin, async (req, res) => {
-//     try {
-//         const [rows] = await db.query(`
-//             SELECT s.*, r.name AS state_name
-//             FROM city s
-//             JOIN state r ON s.state_id = r.id
-//         `);
-//         res.render('admin/city/city', { city: rows });
-//     } catch (err) {
-//         console.log(err);
-//         res.status(500).send({ message: "Error fetching data" });
-//     }
-// });
+});
 
 router.get('/city/city', isAdmin, async (req, res) => {
     try {
@@ -228,28 +394,65 @@ router.get('/city/city', isAdmin, async (req, res) => {
     }
 });
 
+// router.get('/city/renderEditPage/:id', isAdmin, async (req, res) => {
+//     // const id = 1;
+//     const id = req.params.id;
+//     try {
+//         const [rows] = await db.query(
+//             `SELECT city.*, state.name AS state_name
+//              FROM city
+//              LEFT JOIN state ON city.state_id = state.id
+//              WHERE city.id = ?`,
+//             [id]);
+//         if (rows.length === 0) {
+//             return res.status(404).send({ message: "city not found" });
+//         }
+//         const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+//         const allImages = await getAllImages(uploadsDir);
 
-
+//         res.render('admin/city/edit',
+//             {
+//                 city: rows[0],
+//                 images: allImages
+//             }
+//         );
+//     } catch (err) {
+//         console.log(err);
+//         res.status(500).send({ message: "Error fetching data" });
+//     }
+// })
 router.get('/city/renderEditPage/:id', isAdmin, async (req, res) => {
-    // const id = 1;
     const id = req.params.id;
+
     try {
         const [rows] = await db.query(
-            `SELECT city.*, state.name AS state_name
+            `SELECT 
+                city.*, 
+                state.name AS state_name,
+                metadata.meta_title,
+                metadata.meta_description,
+                metadata.meta_keywords
              FROM city
              LEFT JOIN state ON city.state_id = state.id
+             LEFT JOIN metadata ON metadata.module = 'city' AND metadata.module_id = city.id
              WHERE city.id = ?`,
             [id]);
+
         if (rows.length === 0) {
             return res.status(404).send({ message: "city not found" });
         }
-        res.render('admin/city/edit',
-            { city: rows[0] }
-        );
+
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
+
+        res.render('admin/city/edit', {
+            city: rows[0],
+            images: allImages,
+        });
     } catch (err) {
         console.log(err);
         res.status(500).send({ message: "Error fetching data" });
     }
-})
+});
 
 export default router;

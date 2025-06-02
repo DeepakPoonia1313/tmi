@@ -9,7 +9,8 @@
             }
 
             .detail-card-header {
-                background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+                background: black;
+                color: white;
                 padding: 1rem 1.5rem;
                 border-bottom: none;
             }
@@ -75,17 +76,16 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb small px-2 py-2 bg-light rounded">
-                    <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="fas fa-home me-1"></i>
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">
                             Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="/admin/region/region"><i
-                                class="fas fa-map-marked-alt me-1"></i> Regions</a></li>
-                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-info-circle me-1"></i>
+                    <li class="breadcrumb-item"><a href="/admin/region/region">Regions</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">
                         Details</li>
                 </ol>
             </nav>
 
             <div class="card detail-card mb-4">
-                <div class="card-header detail-card-header text-white">
+                <div class="card-header text-black">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Region Details</h5>
                         <span class="badge bg-light text-dark">ID: <%= region.id %></span>
@@ -99,6 +99,13 @@
                                 <div class="detail-label"><i class="fas fa-tag me-1"></i> Name</div>
                                 <div class="detail-value">
                                     <%= region.name %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-tag me-1"></i>Slug</div>
+                                <div class="detail-value">
+                                    <%= region.slug %>
                                 </div>
                             </div>
 
@@ -126,14 +133,21 @@
                             <div class="mb-3">
                                 <div class="detail-label"><i class="fas fa-heading me-1"></i> Meta Title</div>
                                 <div class="detail-value">
-                                    <%= region.meta_title || '<span class="text-muted">Not specified</span>' %>
+                                    <%= region.meta_title || 'Not specified' %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <div class="detail-label"><i class="fas fa-paragraph me-1"></i> Meta Description</div>
                                 <div class="detail-value">
-                                    <%= region.meta_description || '<span class="text-muted">Not specified</span>' %>
+                                    <%= region.meta_description || 'Not specified' %>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="detail-label"><i class="fas fa-paragraph me-1"></i> Meta Keywords</div>
+                                <div class="detail-value">
+                                    <%= region.meta_keywords || 'Not specified' %>
                                 </div>
                             </div>
 
@@ -172,13 +186,13 @@
                     <!-- Action Buttons -->
                     <div class="row mt-4">
                         <div class="col-12 action-btns">
-                            <a href="/admin/region/renderEditPage/<%= region.id %>" class="btn btn-warning">
+                            <a href="/admin/region/renderEditPage/<%= region.id %>" class="btn border-dark">
                                 <i class="fas fa-edit me-1"></i> Edit Region
                             </a>
-                            <a href="/admin/region/region" class="btn btn-secondary ms-2">
+                            <a href="/admin/region/region" class="btn border-dark ms-2">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </a>
-                            <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <button class="btn border-dark ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                 <i class="fas fa-trash-alt me-1"></i> Delete
                             </button>
                         </div>

@@ -1,6 +1,9 @@
 import express from 'express';
 import db from '../../db.js'; // Adjust the path as necessary
 import isAdmin from '../../middleware/adminMiddleware.js';
+import { getAllImages } from '../adminDestRoutes/ejsRoutes.js';
+import fs from 'fs/promises';
+import path from 'path';
 
 const router = express.Router();
 
@@ -17,11 +20,7 @@ const router = express.Router();
 router.get('/theme/theme', isAdmin, async (req, res) => {
     try {
         const [themes] = await db.query(`
-            SELECT 
-                theme.*, 
-                slug.title AS slug_title
-            FROM theme
-            JOIN slug ON theme.slug = slug.id
+            SELECT * FROM theme
         `);
 
         console.log(themes, 'themes');
@@ -58,13 +57,10 @@ router.get('/theme/renderEditPage/:id', isAdmin, async (req, res) => {
             return res.status(404).send({ message: "Theme not found" });
         }
 
-        // 2. Get all slugs
-        const [slugs] = await db.query(`SELECT * FROM slug`);
 
-        // 3. Render the edit page with both theme and slugs
+        // 3. Render the edit page with both theme
         res.render('admin/theme/edit', {
             theme: themeRows[0],
-            slugs
         });
     } catch (err) {
         console.error(err);
@@ -75,15 +71,12 @@ router.get('/theme/renderEditPage/:id', isAdmin, async (req, res) => {
 
 router.get('/theme/renderAddPage', isAdmin, async (req, res) => {
     try {
-        const [slugs] = await db.query('SELECT * FROM slug');
-        console.log(slugs, 'slugs');
         res.render('admin/theme/add', {
             breadcrumbs: [
                 { label: 'Dashboard', url: '/admin/dashboard' },
                 { label: 'themes', url: '/admin/theme/theme' },
                 { label: 'Add theme' }
             ],
-            slugs
         });
     } catch (error) {
         console.error('Error rendering add page:', error);
@@ -107,18 +100,13 @@ router.get('/theme/renderAddPage', isAdmin, async (req, res) => {
 // })
 
 
-// slug
 router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
 
     try {
         const [rows] = await db.query(`
-            SELECT 
-                theme.*, 
-                slug.title AS slug_title
-            FROM theme
-            JOIN slug ON theme.slug = slug.id
-            WHERE theme.id = ?
+            SELECT * FROM theme
+            where id = ?
         `, [id]);
 
         if (rows.length === 0) {
@@ -131,60 +119,6 @@ router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
         res.status(500).send({ message: "Error fetching data" });
     }
 });
-
-
-
-router.get('/slug/slug', isAdmin, async (req, res) => {
-    try {
-        const [slugs] = await db.query('SELECT * FROM slug');
-        console.log(slugs, 'slugs');
-        res.render('admin/slug/slug', { slugs });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Internal Server Error" });
-    }
-})
-
-router.get('/slug/renderEditPage/:id', isAdmin, async (req, res) => {
-    const id = req.params.id;
-    // const id = 1;
-    try {
-        const [rows] = await db.query(`SELECT * FROM slug WHERE id = ?`, [id]);
-        if (rows.length === 0) {
-            return res.status(404).send({ message: "slug not found" });
-        }
-        res.render('admin/slug/edit', { slug: rows[0] });
-    } catch (err) {
-        console.log(err);
-        res.status(500).send({ message: "Error fetching data" });
-    }
-    // res.render('admin/slug/edit', { slug: result.rows[0] });
-})
-
-router.get('/slug/renderAddPage', isAdmin, (req, res) => {
-    res.render('admin/slug/add', {
-        breadcrumbs: [
-            { label: 'Dashboard', url: '/admin/dashboard' },
-            { label: 'slugs', url: '/admin/slug/slug' },
-            { label: 'Add slug' }
-        ]
-    });
-});
-
-router.get('/slug/renderSlugDetail/:id', isAdmin, async (req, res) => {
-    const id = req.params.id;
-    // const id = 1;
-    try {
-        const [rows] = await db.query(`SELECT * FROM slug WHERE id = ?`, [id]);
-        if (rows.length === 0) {
-            return res.status(404).send({ message: "slug not found" });
-        }
-        res.render('admin/slug/show', { slug: rows[0] });
-    } catch (err) {
-        console.log(err);
-        res.status(500).send({ message: "Error fetching data" });
-    }
-})
 
 
 // // interest

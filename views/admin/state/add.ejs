@@ -80,7 +80,7 @@
                         <% if (crumb.url) { %>
                             <li class="breadcrumb-item">
                                 <a href="<%= crumb.url %>" class="text-decoration-none">
-                                    <i class="bi bi-house-door me-1"></i>
+
                                     <%= crumb.label %>
                                 </a>
                             </li>
@@ -95,7 +95,7 @@
             </nav>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header text-black">
                     <h5 class="mb-0">Add New State</h5>
                 </div>
                 <div class="card-body">
@@ -107,6 +107,11 @@
                                     <label for="name" class="form-label fw-bold">State Name</label>
                                     <input type="text" class="form-control" id="name" name="name" required
                                         maxlength="100" placeholder="Enter state name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="slug" class="form-label fw-bold">Slug</label>
+                                    <input type="text" class="form-control" id="slug" name="slug" required
+                                        maxlength="100" placeholder="Enter state slug">
                                 </div>
 
                                 <div class="mb-3">
@@ -148,11 +153,48 @@
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label class="form-label fw-bold">Detailed Content</label>
                             <div id="editor" class="border rounded"
                                 style="min-height: 300px; max-height: 300px; overflow-y: scroll;"></div>
                             <input type="hidden" name="content" id="content">
+                        </div> -->
+                        <div class="editor-container mb-3 ">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
+                                        <label class="form-label fw-bold">Detailed Content</label>
+                                        <div id="editor" class="border rounded"
+                                            style="min-height: 300px; max-height: 400px; overflow-y: auto; height: auto;">
+                                        </div>
+                                        <input type="hidden" name="content" id="content">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-4">
+                                    <div class="gallery-section"
+                                        style="border-left: 1px solid #ccc; padding-left: 10px; max-height: 400px; overflow-y: auto;">
+                                        <h5>Previously Uploaded Images</h5>
+                                        <div class="container">
+                                            <div class="row g-2">
+                                                <% if (images && images.length> 0) { %>
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div class="col-6 col-md-4">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image"
+                                                                style="height: 120px; object-fit: cover; cursor: pointer;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                            <% } else { %>
+                                                                <p>No previously uploaded images.</p>
+                                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
@@ -168,6 +210,13 @@
                                     <label for="meta_description" class="form-label fw-bold">Meta Description</label>
                                     <textarea class="form-control" id="meta_description" name="meta_description"
                                         rows="2" maxlength="255" placeholder="SEO meta description"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="meta_keywords" class="form-label fw-bold">Meta Keywords</label>
+                                    <input name="meta_keywords" id="meta_keywords" class="form-control"
+                                        placeholder="Comma-separated keywords" />
                                 </div>
                             </div>
                         </div>
@@ -258,6 +307,20 @@
                         const data = await res.json();
                         const url = data.file;
 
+                        const row = document.querySelector('.gallery-section .row.g-2');
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-6 col-md-4';
+
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Uploaded Image';
+                        img.className = 'img-fluid rounded selectable-image';
+                        img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                        img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                        colDiv.appendChild(img);
+                        row.prepend(colDiv); // ✅ prepend to show newest first
+
                         const range = quill.getSelection();
                         const imgTag = `<img style="max-width: 300px;" src="${url}">`;
                         quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
@@ -266,6 +329,14 @@
                     }
                 };
             });
+
+            function insertToEditor(imageUrl) {
+                const range = quill.getSelection();
+                if (range) {
+                    quill.insertEmbed(range.index, 'image', imageUrl);
+                    quill.setSelection(range.index + 1);
+                }
+            }
 
             // Image alignment toolbar
             const imageToolbar = document.getElementById('image-toolbar');
@@ -313,5 +384,14 @@
                 preview.src = URL.createObjectURL(event.target.files[0]);
                 preview.style.display = 'block';
             }
+        </script>
+        <script>
+            document.getElementById('name').addEventListener('input', function () {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+                document.getElementById('slug').value = slug;
+            });
         </script>
         <%- include('../layout/footer') %>

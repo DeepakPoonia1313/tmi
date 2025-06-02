@@ -33,6 +33,10 @@
                             <label class="form-label">city Name</label>
                             <input type="text" name="name" class="form-control" value="<%= city.name %>" required>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Slug</label>
+                            <input type="text" name="slug" class="form-control" value="<%= city.slug %>" required>
+                        </div>
 
                         <div class="mb-3">
                             <label class="form-label">Description</label>
@@ -40,10 +44,48 @@
                                 rows="4"><%= city.description %></textarea>
                         </div>
 
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label class="form-label">Content</label>
                             <div id="editor" style="height: 300px;"></div>
                             <input type="hidden" name="content" id="content">
+                        </div> -->
+
+                        <div class="editor-container mb-3 ">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <div id="editor" class="border rounded"
+                                            style="min-height: 300px; max-height: 300px; overflow-y: auto; height: auto;">
+                                        </div>
+                                        <input type="hidden" name="content" id="content">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-4">
+                                    <div class="gallery-section"
+                                        style="border-left: 1px solid #ccc; padding-left: 10px; max-height: 400px; overflow-y: auto;">
+                                        <h5>Previously Uploaded Images</h5>
+                                        <div class="container">
+                                            <div class="row g-2">
+                                                <% if (images && images.length> 0) { %>
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div class="col-6 col-md-4">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image"
+                                                                style="height: 120px; object-fit: cover; cursor: pointer;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                            <% } else { %>
+                                                                <p>No previously uploaded images.</p>
+                                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -78,6 +120,13 @@
                             <label class="form-label">Meta Description</label>
                             <textarea name="meta_description" class="form-control"
                                 rows="3"><%= city.meta_description %></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Meta Keywords</label>
+                            <!-- <textarea name="meta_keywords" class="form-control"
+                                rows="3"><%= city.meta_keywords %></textarea> -->
+                            <input type="text" name="meta_keywords" class="form-control"
+                                value="<%= city.meta_keywords %>">
                         </div>
 
                         <div class="mb-3">
@@ -159,6 +208,20 @@
                         const data = await res.json();
                         const url = data.file;
 
+                        const row = document.querySelector('.gallery-section .row.g-2');
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-6 col-md-4';
+
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Uploaded Image';
+                        img.className = 'img-fluid rounded selectable-image';
+                        img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                        img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                        colDiv.appendChild(img);
+                        row.prepend(colDiv); // ✅ prepend to show newest first
+
                         const range = quill.getSelection();
                         const imgTag = `<img style="max-width: 300px;" src="${url}">`;
                         quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
@@ -167,6 +230,14 @@
                     }
                 };
             });
+
+            function insertToEditor(imageUrl) {
+                const range = quill.getSelection();
+                if (range) {
+                    quill.insertEmbed(range.index, 'image', imageUrl);
+                    quill.setSelection(range.index + 1);
+                }
+            }
 
             // Floating image toolbar
             const imageToolbar = document.getElementById('image-toolbar');

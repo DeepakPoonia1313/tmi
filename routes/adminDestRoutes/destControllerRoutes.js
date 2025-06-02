@@ -10,20 +10,48 @@ const dynamicImageUpload = createDynamicMulterMiddleware();
 
 const router = express.Router();
 
+// router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     const { name, description, content, image, meta_title, meta_description, meta_keywords, slug } = req.body;
+
+//     try {
+//         if (!name || !description || (!image && !req.filePath)) {
+//             return res.status(400).send('Name, description, and image are required.');
+//         }
+
+//         const [result] = await db.query(`
+//       INSERT INTO region (name, description, content, image, meta_title, meta_description, meta_keywords,slug)
+//       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+//     `, [name, description, content, req.filePath || image, meta_title, meta_description, meta_keywords, slug]);
+
+//         console.log(result, "<= This is the result fot thr region add query.")
+
+//         res.redirect('/admin/region/region');
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Error saving region.');
+//     }
+// });
 router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
-    const { name, description, content, image, meta_title, meta_description } = req.body;
+    const { name, description, content, image, meta_title, meta_description, meta_keywords, slug } = req.body;
 
     try {
         if (!name || !description || (!image && !req.filePath)) {
             return res.status(400).send('Name, description, and image are required.');
         }
 
-        const [result] = await db.query(`
-      INSERT INTO region (name, description, content, image, meta_title, meta_description)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [name, description, content, req.filePath || image, meta_title, meta_description]);
+        // 1. Insert into `region` table
+        const [regionResult] = await db.query(`
+            INSERT INTO region (name, description, content, image, slug)
+            VALUES (?, ?, ?, ?, ?)
+        `, [name, description, content, req.filePath || image, slug]);
 
-        console.log(result, "<= This is the result fot thr region add query.")
+        const regionId = regionResult.insertId;
+
+        // 2. Insert metadata
+        await db.query(`
+            INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+            VALUES (?, ?, ?, ?, ?)
+        `, ['region', regionId, meta_title, meta_description, meta_keywords]); // 1 = region module
 
         res.redirect('/admin/region/region');
     } catch (err) {
@@ -32,16 +60,95 @@ router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (r
     }
 });
 
+// router.post('/region/update', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     try {
+//         const { id, name, description, meta_title, meta_description, meta_keywords, content, slug } = req.body;
+//         const image = req.filePath; // might be undefined if no new image uploaded
+
+//         if (!id) {
+//             return res.status(400).send({ message: "Missing region ID" });
+//         }
+
+//         // Build update query dynamically only for fields present
+//         const fields = [];
+//         const values = [];
+
+//         if (name !== undefined) {
+//             fields.push('name = ?');
+//             values.push(name);
+//         }
+//         if (description !== undefined) {
+//             fields.push('description = ?');
+//             values.push(description);
+//         }
+//         if (meta_title !== undefined) {
+//             fields.push('meta_title = ?');
+//             values.push(meta_title);
+//         }
+//         if (meta_description !== undefined) {
+//             fields.push('meta_description = ?');
+//             values.push(meta_description);
+//         }
+//         if (meta_keywords !== undefined) {
+//             fields.push('meta_keywords = ?');
+//             values.push(meta_keywords);
+//         }
+//         if (image !== undefined) {
+//             fields.push('image = ?');
+//             values.push(image);
+//         }
+//         if (content !== undefined) {
+//             fields.push('content = ?');
+//             values.push(content);
+//         }
+//         if (slug !== undefined) {
+//             fields.push('slug = ?');
+//             values.push(slug);
+//         }
+
+//         if (fields.length === 0) {
+//             return res.status(400).send({ message: 'No fields to update' });
+//         }
+
+//         values.push(id);
+
+//         let oldImagePath;
+//         if (image) {
+//             const [rows] = await db.query('SELECT image FROM region WHERE id = ?', [id]);
+//             if (rows.length > 0) {
+//                 oldImagePath = rows[0].image;
+//                 console.log(image, oldImagePath);
+//             }
+//         }
+
+//         if (image && oldImagePath && oldImagePath !== image) {
+//             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
+//             console.log(fullOldImagePath);
+//             fs.unlink(fullOldImagePath, (err) => {
+//                 if (err) console.error('Error deleting old image:', err);
+//                 else console.log('Old image deleted:', fullOldImagePath);
+//             });
+//         }
+
+//         const updateQuery = `UPDATE region SET ${fields.join(', ')} WHERE id = ?`;
+
+//         await db.execute(updateQuery, values);
+
+//         res.redirect('/admin/region/region');
+//     } catch (err) {
+//         console.error('Error updating region:', err);
+//         res.status(500).send({ message: 'Internal server error' });
+//     }
+// });
 router.post('/region/update', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
     try {
-        const { id, name, description, meta_title, meta_description, content } = req.body;
-        const image = req.filePath; // might be undefined if no new image uploaded
+        const { id, name, description, meta_title, meta_description, meta_keywords, content, slug } = req.body;
+        const image = req.filePath;
 
         if (!id) {
             return res.status(400).send({ message: "Missing region ID" });
         }
 
-        // Build update query dynamically only for fields present
         const fields = [];
         const values = [];
 
@@ -53,14 +160,6 @@ router.post('/region/update', isAdmin, dynamicImageUpload.single('image'), async
             fields.push('description = ?');
             values.push(description);
         }
-        if (meta_title !== undefined) {
-            fields.push('meta_title = ?');
-            values.push(meta_title);
-        }
-        if (meta_description !== undefined) {
-            fields.push('meta_description = ?');
-            values.push(meta_description);
-        }
         if (image !== undefined) {
             fields.push('image = ?');
             values.push(image);
@@ -69,34 +168,45 @@ router.post('/region/update', isAdmin, dynamicImageUpload.single('image'), async
             fields.push('content = ?');
             values.push(content);
         }
-
-        if (fields.length === 0) {
-            return res.status(400).send({ message: 'No fields to update' });
+        if (slug !== undefined) {
+            fields.push('slug = ?');
+            values.push(slug);
         }
 
         values.push(id);
 
-        let oldImagePath;
+        if (fields.length > 0) {
+            const updateQuery = `UPDATE region SET ${fields.join(', ')} WHERE id = ?`;
+            await db.execute(updateQuery, values);
+        }
+
+        // Handle old image deletion if needed
         if (image) {
             const [rows] = await db.query('SELECT image FROM region WHERE id = ?', [id]);
-            if (rows.length > 0) {
-                oldImagePath = rows[0].image;
-                console.log(image, oldImagePath);
+            if (rows.length > 0 && rows[0].image && rows[0].image !== image) {
+                const fullOldImagePath = path.join(process.cwd(), 'public', rows[0].image);
+                fs.unlink(fullOldImagePath, (err) => {
+                    if (err) console.error('Error deleting old image:', err);
+                    else console.log('Old image deleted:', fullOldImagePath);
+                });
             }
         }
 
-        if (image && oldImagePath && oldImagePath !== image) {
-            const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-            console.log(fullOldImagePath);
-            fs.unlink(fullOldImagePath, (err) => {
-                if (err) console.error('Error deleting old image:', err);
-                else console.log('Old image deleted:', fullOldImagePath);
-            });
+        // Upsert metadata: try update first, then insert if not found
+        const [metaRows] = await db.query(`SELECT * FROM metadata WHERE module = ? AND module_id = ?`, ['region', id]);
+
+        if (metaRows.length > 0) {
+            await db.query(`
+                UPDATE metadata
+                SET meta_title = ?, meta_description = ?, meta_keywords = ?
+                WHERE module = ? AND module_id = ?
+            `, [meta_title, meta_description, meta_keywords, 'region', id]);
+        } else {
+            await db.query(`
+                INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+                VALUES (?, ?, ?, ?, ?)
+            `, ['region', id, meta_title, meta_description, meta_keywords]);
         }
-
-        const updateQuery = `UPDATE region SET ${fields.join(', ')} WHERE id = ?`;
-
-        await db.execute(updateQuery, values);
 
         res.redirect('/admin/region/region');
     } catch (err) {
@@ -124,8 +234,116 @@ router.get('/region/delete/:id', isAdmin, async (req, res) => {
     }
 })
 
+// router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     const { name, description, content, region_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+
+//     try {
+//         if (!name || !description || !region_id || (!req.filePath && !req.body.image)) {
+//             return res.status(400).send('Name, description, region ID, and image are required.');
+//         }
+
+//         const image = req.filePath || req.body.image;
+
+//         const [result] = await db.query(`
+//             INSERT INTO state (name, description, content, image, region_id, meta_title, meta_description, meta_keywords, slug)
+//             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+//         `, [name, description, content, image, region_id, meta_title, meta_description, meta_keywords, slug]);
+
+//         console.log(result, "<= State added");
+
+//         res.redirect('/admin/state/state');
+//     } catch (err) {
+//         console.error('Error adding state:', err);
+//         res.status(500).send('Error saving state.');
+//     }
+// });
+
+// router.post('/state/update/:id', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const { name, description, content, region_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+//         const image = req.filePath; // undefined if no new image uploaded
+
+//         if (!id) {
+//             return res.status(400).send({ message: "Missing state ID" });
+//         }
+
+//         const fields = [];
+//         const values = [];
+
+//         if (name !== undefined) {
+//             fields.push('name = ?');
+//             values.push(name);
+//         }
+//         if (description !== undefined) {
+//             fields.push('description = ?');
+//             values.push(description);
+//         }
+//         if (content !== undefined) {
+//             fields.push('content = ?');
+//             values.push(content);
+//         }
+//         if (image !== undefined) {
+//             fields.push('image = ?');
+//             values.push(image);
+//         }
+//         if (region_id !== undefined) {
+//             fields.push('region_id = ?');
+//             values.push(region_id);
+//         }
+//         if (meta_title !== undefined) {
+//             fields.push('meta_title = ?');
+//             values.push(meta_title);
+//         }
+//         if (meta_description !== undefined) {
+//             fields.push('meta_description = ?');
+//             values.push(meta_description);
+//         }
+//         if (meta_keywords !== undefined) {
+//             fields.push('meta_keywords = ?');
+//             values.push(meta_keywords);
+//         }
+//         if (slug !== undefined) {
+//             fields.push('slug = ?');
+//             values.push(slug);
+//         }
+
+//         if (fields.length === 0) {
+//             return res.status(400).send({ message: 'No fields to update' });
+//         }
+
+//         values.push(id);
+
+//         let oldImagePath;
+//         if (image) {
+//             const [rows] = await db.query('SELECT image FROM state WHERE id = ?', [id]);
+//             if (rows.length > 0) {
+//                 oldImagePath = rows[0].image;
+//                 console.log(image, oldImagePath);
+//             }
+//         }
+
+//         if (image && oldImagePath && oldImagePath !== image) {
+//             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
+//             console.log(fullOldImagePath);
+//             fs.unlink(fullOldImagePath, (err) => {
+//                 if (err) console.error('Error deleting old image:', err);
+//                 else console.log('Old image deleted:', fullOldImagePath);
+//             });
+//         }
+
+//         const updateQuery = `UPDATE state SET ${fields.join(', ')} WHERE id = ?`;
+
+//         await db.execute(updateQuery, values);
+
+//         res.redirect('/admin/state/state');
+//     } catch (err) {
+//         console.error('Error updating state:', err);
+//         res.status(500).send({ message: 'Internal server error' });
+//     }
+// });
 router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
-    const { name, description, content, region_id, meta_title, meta_description } = req.body;
+    const { name, description, content, region_id, meta_title, meta_description, meta_keywords, slug } = req.body;
 
     try {
         if (!name || !description || !region_id || (!req.filePath && !req.body.image)) {
@@ -135,9 +353,16 @@ router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (re
         const image = req.filePath || req.body.image;
 
         const [result] = await db.query(`
-            INSERT INTO state (name, description, content, image, region_id, meta_title, meta_description)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [name, description, content, image, region_id, meta_title, meta_description]);
+            INSERT INTO state (name, description, content, image, region_id, slug)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [name, description, content, image, region_id, slug]);
+
+        const stateId = result.insertId;
+
+        await db.query(`
+            INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+            VALUES (?, ?, ?, ?, ?)
+        `, ['state', stateId, meta_title, meta_description, meta_keywords]);
 
         console.log(result, "<= State added");
 
@@ -148,11 +373,12 @@ router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (re
     }
 });
 
+
 router.post('/state/update/:id', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, description, content, region_id, meta_title, meta_description } = req.body;
-        const image = req.filePath; // undefined if no new image uploaded
+        const { name, description, content, region_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+        const image = req.filePath;
 
         if (!id) {
             return res.status(400).send({ message: "Missing state ID" });
@@ -181,42 +407,41 @@ router.post('/state/update/:id', isAdmin, dynamicImageUpload.single('image'), as
             fields.push('region_id = ?');
             values.push(region_id);
         }
-        if (meta_title !== undefined) {
-            fields.push('meta_title = ?');
-            values.push(meta_title);
-        }
-        if (meta_description !== undefined) {
-            fields.push('meta_description = ?');
-            values.push(meta_description);
+        if (slug !== undefined) {
+            fields.push('slug = ?');
+            values.push(slug);
         }
 
-        if (fields.length === 0) {
-            return res.status(400).send({ message: 'No fields to update' });
-        }
+        if (fields.length > 0) {
+            values.push(id);
 
-        values.push(id);
-
-        let oldImagePath;
-        if (image) {
-            const [rows] = await db.query('SELECT image FROM state WHERE id = ?', [id]);
-            if (rows.length > 0) {
-                oldImagePath = rows[0].image;
-                console.log(image, oldImagePath);
+            if (image) {
+                const [rows] = await db.query('SELECT image FROM state WHERE id = ?', [id]);
+                if (rows.length > 0) {
+                    const oldImagePath = rows[0].image;
+                    const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
+                    if (oldImagePath && oldImagePath !== image) {
+                        fs.unlink(fullOldImagePath, (err) => {
+                            if (err) console.error('Error deleting old image:', err);
+                            else console.log('Old image deleted:', fullOldImagePath);
+                        });
+                    }
+                }
             }
+
+            const updateQuery = `UPDATE state SET ${fields.join(', ')} WHERE id = ?`;
+            await db.execute(updateQuery, values);
         }
 
-        if (image && oldImagePath && oldImagePath !== image) {
-            const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-            console.log(fullOldImagePath);
-            fs.unlink(fullOldImagePath, (err) => {
-                if (err) console.error('Error deleting old image:', err);
-                else console.log('Old image deleted:', fullOldImagePath);
-            });
-        }
-
-        const updateQuery = `UPDATE state SET ${fields.join(', ')} WHERE id = ?`;
-
-        await db.execute(updateQuery, values);
+        // Metadata update
+        await db.query(`
+            INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                meta_title = VALUES(meta_title),
+                meta_description = VALUES(meta_description),
+                meta_keywords = VALUES(meta_keywords)
+        `, ['state', id, meta_title, meta_description, meta_keywords]);
 
         res.redirect('/admin/state/state');
     } catch (err) {
@@ -224,6 +449,7 @@ router.post('/state/update/:id', isAdmin, dynamicImageUpload.single('image'), as
         res.status(500).send({ message: 'Internal server error' });
     }
 });
+
 
 router.get('/state/delete/:id', isAdmin, async (req, res) => {
     try {
@@ -244,8 +470,116 @@ router.get('/state/delete/:id', isAdmin, async (req, res) => {
 
 })
 
+// router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     const { name, description, content, state_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+
+//     try {
+//         if (!name || !description || !state_id || (!req.filePath && !req.body.image)) {
+//             return res.status(400).send('Name, description, state ID, and image are required.');
+//         }
+
+//         const image = req.filePath || req.body.image;
+
+//         const [result] = await db.query(`
+//             INSERT INTO city (name, description, content, image, state_id, meta_title, meta_description, meta_keywords, slug)
+//             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+//         `, [name, description, content, image, state_id, meta_title, meta_description, meta_keywords, slug]);
+
+//         console.log(result, "<= city added");
+
+//         res.redirect('/admin/city/city');
+//     } catch (err) {
+//         console.error('Error adding city:', err);
+//         res.status(500).send('Error saving city.');
+//     }
+// });
+
+// router.post('/city/update/:id', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
+//     try {
+//         const id = req.params.id;
+//         const { name, description, content, state_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+//         const image = req.filePath; // undefined if no new image uploaded
+
+//         if (!id) {
+//             return res.status(400).send({ message: "Missing city ID" });
+//         }
+
+//         const fields = [];
+//         const values = [];
+
+//         if (name !== undefined) {
+//             fields.push('name = ?');
+//             values.push(name);
+//         }
+//         if (description !== undefined) {
+//             fields.push('description = ?');
+//             values.push(description);
+//         }
+//         if (content !== undefined) {
+//             fields.push('content = ?');
+//             values.push(content);
+//         }
+//         if (image !== undefined) {
+//             fields.push('image = ?');
+//             values.push(image);
+//         }
+//         if (state_id !== undefined) {
+//             fields.push('state_id = ?');
+//             values.push(state_id);
+//         }
+//         if (meta_title !== undefined) {
+//             fields.push('meta_title = ?');
+//             values.push(meta_title);
+//         }
+//         if (meta_description !== undefined) {
+//             fields.push('meta_description = ?');
+//             values.push(meta_description);
+//         }
+//         if (meta_keywords !== undefined) {
+//             fields.push('meta_keywords = ?');
+//             values.push(meta_keywords);
+//         }
+//         if (slug !== undefined) {
+//             fields.push('slug = ?');
+//             values.push(slug);
+//         }
+
+//         if (fields.length === 0) {
+//             return res.status(400).send({ message: 'No fields to update' });
+//         }
+
+//         values.push(id);
+
+//         let oldImagePath;
+//         if (image) {
+//             const [rows] = await db.query('SELECT image FROM city WHERE id = ?', [id]);
+//             if (rows.length > 0) {
+//                 oldImagePath = rows[0].image;
+//                 console.log(image, oldImagePath);
+//             }
+//         }
+
+//         if (image && oldImagePath && oldImagePath !== image) {
+//             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
+//             console.log(fullOldImagePath);
+//             fs.unlink(fullOldImagePath, (err) => {
+//                 if (err) console.error('Error deleting old image:', err);
+//                 else console.log('Old image deleted:', fullOldImagePath);
+//             });
+//         }
+
+//         const updateQuery = `UPDATE city SET ${fields.join(', ')} WHERE id = ?`;
+
+//         await db.execute(updateQuery, values);
+
+//         res.redirect('/admin/city/city');
+//     } catch (err) {
+//         console.error('Error updating city:', err);
+//         res.status(500).send({ message: 'Internal server error' });
+//     }
+// });
 router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
-    const { name, description, content, state_id, meta_title, meta_description } = req.body;
+    const { name, description, content, state_id, meta_title, meta_description, meta_keywords, slug } = req.body;
 
     try {
         if (!name || !description || !state_id || (!req.filePath && !req.body.image)) {
@@ -255,12 +589,18 @@ router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req
         const image = req.filePath || req.body.image;
 
         const [result] = await db.query(`
-            INSERT INTO city (name, description, content, image, state_id, meta_title, meta_description)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `, [name, description, content, image, state_id, meta_title, meta_description]);
+            INSERT INTO city (name, description, content, image, state_id, slug)
+            VALUES (?, ?, ?, ?, ?, ?)
+        `, [name, description, content, image, state_id, slug]);
+
+        const cityId = result.insertId;
+
+        await db.query(`
+            INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+            VALUES (?, ?, ?, ?, ?)
+        `, ['city', cityId, meta_title, meta_description, meta_keywords]);
 
         console.log(result, "<= city added");
-
         res.redirect('/admin/city/city');
     } catch (err) {
         console.error('Error adding city:', err);
@@ -268,11 +608,12 @@ router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req
     }
 });
 
+
 router.post('/city/update/:id', isAdmin, dynamicImageUpload.single('image'), async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, description, content, state_id, meta_title, meta_description } = req.body;
-        const image = req.filePath; // undefined if no new image uploaded
+        const { name, description, content, state_id, meta_title, meta_description, meta_keywords, slug } = req.body;
+        const image = req.filePath;
 
         if (!id) {
             return res.status(400).send({ message: "Missing city ID" });
@@ -301,42 +642,43 @@ router.post('/city/update/:id', isAdmin, dynamicImageUpload.single('image'), asy
             fields.push('state_id = ?');
             values.push(state_id);
         }
-        if (meta_title !== undefined) {
-            fields.push('meta_title = ?');
-            values.push(meta_title);
-        }
-        if (meta_description !== undefined) {
-            fields.push('meta_description = ?');
-            values.push(meta_description);
+        if (slug !== undefined) {
+            fields.push('slug = ?');
+            values.push(slug);
         }
 
-        if (fields.length === 0) {
-            return res.status(400).send({ message: 'No fields to update' });
-        }
+        if (fields.length > 0) {
+            values.push(id);
 
-        values.push(id);
-
-        let oldImagePath;
-        if (image) {
-            const [rows] = await db.query('SELECT image FROM city WHERE id = ?', [id]);
-            if (rows.length > 0) {
-                oldImagePath = rows[0].image;
-                console.log(image, oldImagePath);
+            // Delete old image if replaced
+            let oldImagePath;
+            if (image) {
+                const [rows] = await db.query('SELECT image FROM city WHERE id = ?', [id]);
+                if (rows.length > 0) {
+                    oldImagePath = rows[0].image;
+                }
             }
+
+            if (image && oldImagePath && oldImagePath !== image) {
+                const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
+                fs.unlink(fullOldImagePath, (err) => {
+                    if (err) console.error('Error deleting old image:', err);
+                    else console.log('Old image deleted:', fullOldImagePath);
+                });
+            }
+
+            const updateQuery = `UPDATE city SET ${fields.join(', ')} WHERE id = ?`;
+            await db.execute(updateQuery, values);
         }
 
-        if (image && oldImagePath && oldImagePath !== image) {
-            const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-            console.log(fullOldImagePath);
-            fs.unlink(fullOldImagePath, (err) => {
-                if (err) console.error('Error deleting old image:', err);
-                else console.log('Old image deleted:', fullOldImagePath);
-            });
-        }
-
-        const updateQuery = `UPDATE city SET ${fields.join(', ')} WHERE id = ?`;
-
-        await db.execute(updateQuery, values);
+       await db.query(`
+            INSERT INTO metadata (module, module_id, meta_title, meta_description, meta_keywords)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                meta_title = VALUES(meta_title),
+                meta_description = VALUES(meta_description),
+                meta_keywords = VALUES(meta_keywords)
+        `, ['city', id, meta_title, meta_description, meta_keywords]);
 
         res.redirect('/admin/city/city');
     } catch (err) {

@@ -145,17 +145,16 @@
             <!-- Breadcrumb -->
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb bg-light p-2 rounded">
-                    <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="fas fa-home me-1"></i>
+                    <li class="breadcrumb-item"><a href="/admin/dashboard">
                             Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="/admin/region/region"><i
-                                class="fas fa-map-marked-alt me-1"></i> Regions</a></li>
-                    <li class="breadcrumb-item active" aria-current="page"><i class="fas fa-edit me-1"></i> Edit Region
+                    <li class="breadcrumb-item"><a href="/admin/region/region"> Regions</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"> Edit Region
                     </li>
                 </ol>
             </nav>
 
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header text-black">
                     <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Edit Region</h4>
                 </div>
                 <div class="card-body">
@@ -172,6 +171,11 @@
                                     <label for="name" class="form-label">Region Name *</label>
                                     <input type="text" class="form-control" id="name" name="name"
                                         value="<%= region.name %>" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Slug *</label>
+                                    <input type="text" class="form-control" id="slug" name="slug"
+                                        value="<%= region.slug %>" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="description" class="form-label">Short Description</label>
@@ -194,6 +198,14 @@
                                 <label for="meta_description" class="form-label">Meta Description</label>
                                 <textarea class="form-control" id="meta_description" name="meta_description"
                                     rows="2"><%= region.meta_description %></textarea>
+                                <small class="text-muted">Recommended: 150-160 characters</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="meta_keywords" class="form-label">Meta Keywords</label>
+                                <!-- <textarea class="form-control" id="meta_keywords" name="meta_keywords"
+                                    rows="2"><%= region.meta_keywords %></textarea> -->
+                                <input type="text" class="form-control" id="meta_keywords" name="meta_keywords"
+                                    value="<%= region.meta_keywords %>">
                                 <small class="text-muted">Recommended: 150-160 characters</small>
                             </div>
                         </div>
@@ -242,13 +254,49 @@
 
 
                         <!-- Content Section -->
-                        <div class="form-section">
+                        <!-- <div class="form-section">
                             <h5><i class="fas fa-align-left me-2"></i> Region Content</h5>
                             <div class="editor-container mb-3">
-                                <!-- Quill editor will be inserted here -->
                                 <div id="editor"><%- region.content %></div>
                             </div>
                             <input type="hidden" name="content" id="content">
+                        </div> -->
+                        <div class="editor-container mb-3 ">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
+                                        <label class="form-label fw-bold">Detailed Content</label>
+                                        <div id="editor" class="border rounded"
+                                            style="min-height: 300px; max-height: 400px; overflow-y: auto; height: auto;">
+                                        </div>
+                                        <input type="hidden" name="content" id="content">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-4">
+                                    <div class="gallery-section"
+                                        style="border-left: 1px solid #ccc; padding-left: 10px; max-height: 400px; overflow-y: auto;">
+                                        <h5>Previously Uploaded Images</h5>
+                                        <div class="container">
+                                            <div class="row g-2">
+                                                <% if (images && images.length> 0) { %>
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div class="col-6 col-md-4">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image"
+                                                                style="height: 120px; object-fit: cover; cursor: pointer;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                            <% } else { %>
+                                                                <p>No previously uploaded images.</p>
+                                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Form Actions -->
@@ -338,6 +386,20 @@
                         const data = await res.json();
                         const url = data.file;
 
+                        const row = document.querySelector('.gallery-section .row.g-2');
+                        const colDiv = document.createElement('div');
+                        colDiv.className = 'col-6 col-md-4';
+
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Uploaded Image';
+                        img.className = 'img-fluid rounded selectable-image';
+                        img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                        img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                        colDiv.appendChild(img);
+                        row.prepend(colDiv); // ✅ prepend to show newest first
+
                         const range = quill.getSelection();
                         const imgTag = `<img style="max-width: 300px;" src="${url}">`;
                         quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
@@ -347,6 +409,13 @@
                 };
             });
 
+            function insertToEditor(imageUrl) {
+                const range = quill.getSelection();
+                if (range) {
+                    quill.insertEmbed(range.index, 'image', imageUrl);
+                    quill.setSelection(range.index + 1);
+                }
+            }
             // Floating image toolbar
             const imageToolbar = document.getElementById('image-toolbar');
 
