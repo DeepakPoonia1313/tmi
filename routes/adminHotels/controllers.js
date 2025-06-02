@@ -58,7 +58,7 @@ router.post('/hotel/add', upload.fields([
         res.redirect('/admin/hotel/hotel');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Something went wrong');
+        res.status(500).send({'Something went wrong': err});
     }
 });
 
@@ -142,7 +142,7 @@ router.post('/hotel/edit/:id', upload.fields([
         res.redirect('/admin/hotel/hotel');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Something went wrong during hotel update');
+        res.status(500).send({ 'Something went wrong during hotel update': err });
     }
 });
 

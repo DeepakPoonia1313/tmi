@@ -10,10 +10,10 @@ const router = express.Router();
 //             SELECT * FROM hotels
 //         `);
 
-//         console.log(hotels, 'hotels');
+//         // console.log(hotels, 'hotels');
 //         res.render('admin/hotel/hotel', { hotels });
 //     } catch (error) {
-//         console.log(error);
+//         // console.log(error);
 //         res.status(500).send({ message: "Internal Server Error" });
 //     }
 // });
@@ -52,7 +52,7 @@ const router = express.Router();
 //             currentPage
 //         });
 //     } catch (error) {
-//         console.log(error);
+//         // console.log(error);
 //         res.status(500).send({ message: "Internal Server Error" });
 //     }
 // });
@@ -102,7 +102,7 @@ router.get('/hotel/hotel', isAdmin, async (req, res) => {
 
     } catch (error) {
         console.error('Error fetching hotels:', error);
-        res.status(500).send('Server error');
+        res.status(500).send({'Server error': error});
     }
 });
 
@@ -123,7 +123,7 @@ router.get('/hotel/renderEditPage/:id', isAdmin, async (req, res) => {
         }
 
         const [hotelImages] = await db.query(`SELECT * FROM hotel_images WHERE hotel_id = ?`, [id]);
-        console.log(hotelImages);
+        // console.log(hotelImages);
         // 2. Get all slugs
         const [themes] = await db.query('SELECT id, name FROM theme');
 
@@ -140,7 +140,7 @@ router.get('/hotel/renderEditPage/:id', isAdmin, async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 
@@ -166,7 +166,7 @@ router.get('/api/cities', async (req, res) => {
 router.get('/hotel/renderAddPage', async (req, res) => {
     try {
         const [hotelImages] = await db.query('SELECT * FROM hotel_images');
-        console.log(" hotelImages => ", hotelImages);
+        // console.log(" hotelImages => ", hotelImages);
         // const [cities] = await db.query('SELECT id, name FROM city');
         const [themes] = await db.query('SELECT id, name FROM theme');
         res.render('admin/hotel/add', {
@@ -180,7 +180,7 @@ router.get('/hotel/renderAddPage', async (req, res) => {
         });
     } catch (error) {
         console.error('Error rendering add page:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error', error });
     }
 });
 
@@ -198,11 +198,11 @@ router.get('/hotel/renderHotelDetail/:id', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).send({ message: "hotel not found" });
         }
-        console.log(rows)
+        // console.log(rows)
         res.render('admin/hotel/show', { hotel: rows[0] });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 

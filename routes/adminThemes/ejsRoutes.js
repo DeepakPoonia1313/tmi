@@ -10,10 +10,10 @@ const router = express.Router();
 // router.get('/theme/theme', isAdmin, async (req, res) => {
 //     try {
 //         const [themes] = await db.query('SELECT * FROM theme');
-//         console.log(themes, 'themes');
+//         // console.log(themes, 'themes');
 //         res.render('admin/theme/theme', { themes });
 //     } catch (error) {
-//         console.log(error);
+//         // console.log(error);
 //         res.status(500).send({ message: "Internal Server Error" });
 //     }
 // })
@@ -23,11 +23,11 @@ router.get('/theme/theme', isAdmin, async (req, res) => {
             SELECT * FROM theme
         `);
 
-        console.log(themes, 'themes');
+        // console.log(themes, 'themes');
         res.render('admin/theme/theme', { themes });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Internal Server Error" });
+        // console.log(error);
+        res.status(500).send({ message: "Internal Server Error", error });
     }
 });
 
@@ -42,11 +42,11 @@ router.get('/theme/theme', isAdmin, async (req, res) => {
 //         }
 //         res.render('admin/theme/edit', { theme: rows[0] });
 //     } catch (err) {
-//         console.log(err);
+//         // console.log(err);
 //         res.status(500).send({ message: "Error fetching data" });
 //     }
 //     // res.render('admin/theme/edit', { theme: result.rows[0] });
-// })
+// }) 
 router.get('/theme/renderEditPage/:id', isAdmin, async (req, res) => {
     const id = req.params.id;
 
@@ -57,30 +57,35 @@ router.get('/theme/renderEditPage/:id', isAdmin, async (req, res) => {
             return res.status(404).send({ message: "Theme not found" });
         }
 
-
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
         // 3. Render the edit page with both theme
         res.render('admin/theme/edit', {
             theme: themeRows[0],
+            images: allImages,
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 
 
 router.get('/theme/renderAddPage', isAdmin, async (req, res) => {
     try {
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+        const allImages = await getAllImages(uploadsDir);
         res.render('admin/theme/add', {
             breadcrumbs: [
                 { label: 'Dashboard', url: '/admin/dashboard' },
                 { label: 'themes', url: '/admin/theme/theme' },
                 { label: 'Add theme' }
             ],
+            images: allImages,
         });
     } catch (error) {
         console.error('Error rendering add page:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error', error });
     }
 });
 
@@ -94,7 +99,7 @@ router.get('/theme/renderAddPage', isAdmin, async (req, res) => {
 //         }
 //         res.render('admin/theme/show', { theme: rows[0] });
 //     } catch (err) {
-//         console.log(err);
+//         // console.log(err);
 //         res.status(500).send({ message: "Error fetching data" });
 //     }
 // })
@@ -112,23 +117,21 @@ router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).send({ message: "Theme not found" });
         }
-        // console.log(rows)
         res.render('admin/theme/show', { theme: rows[0] });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 
 
-// // interest
 // router.get('/interest/interest', isAdmin, async (req, res) => {
 //     try {
 //         const [interests] = await db.query('SELECT * FROM interest');
-//         console.log(interests, 'interests');
+//         // console.log(interests, 'interests');
 //         res.render('admin/interest/interest', { interests });
 //     } catch (error) {
-//         console.log(error);
+//         // console.log(error);
 //         res.status(500).send({ message: "Internal Server Error" });
 //     }
 // })
@@ -143,7 +146,7 @@ router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
 //         }
 //         res.render('admin/interest/edit', { interest: rows[0] });
 //     } catch (err) {
-//         console.log(err);
+//         // console.log(err);
 //         res.status(500).send({ message: "Error fetching data" });
 //     }
 //     // res.render('admin/interest/edit', { interest: result.rows[0] });
@@ -159,20 +162,6 @@ router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
 //     });
 // });
 
-// // router.get('/interest/renderinterestDetail/:id', isAdmin, async (req, res) => {
-// //     const id = req.params.id;
-// //     // const id = 1;
-// //     try {
-// //         const [rows] = await db.query(`SELECT * FROM interest WHERE id = ?`, [id]);
-// //         if (rows.length === 0) {
-// //             return res.status(404).send({ message: "interest not found" });
-// //         }
-// //         res.render('admin/interest/show', { interest: rows[0] });
-// //     } catch (err) {
-// //         console.log(err);
-// //         res.status(500).send({ message: "Error fetching data" });
-// //     }
-// // })
 // router.get('/interest/renderinterestDetail/:id', isAdmin, async (req, res) => {
 //     const id = req.params.id;
 
@@ -189,7 +178,6 @@ router.get('/theme/renderthemeDetail/:id', isAdmin, async (req, res) => {
 //         if (rows.length === 0) {
 //             return res.status(404).send({ message: "interest not found" });
 //         }
-//         // console.log(rows)
 //         res.render('admin/interest/show', { interest: rows[0] });
 //     } catch (err) {
 //         console.error(err);

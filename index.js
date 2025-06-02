@@ -11,6 +11,7 @@ import mainRouter from './allRoutes.js'
 dotenv.config();
 
 const PORT = process.env.PORT || 3009;
+const base_url = process.env.BASE_URL || `http://localhost:${PORT}`;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,7 +53,7 @@ const startServer = async () => {
         app.post('/upload/:module/:moduleId', dynamicImageUpload.single('image'), (req, res) => {
             res.json({
                 message: 'File uploaded successfully',
-                file: req.filePath,
+                file: `${base_url}/${req.filePath}`,
             });
         });
 

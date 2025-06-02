@@ -7,6 +7,16 @@ import path from 'path';
 import fs from 'fs';
 
 const dynamicImageUpload = createDynamicMulterMiddleware();
+export function removeDataMceSrc(html) {
+  return html
+    // Replace only in <img> tags: src="../../uploads/..." → src="/uploads/..."
+    .replace(/<img([^>]*?)src="\.\.\/\.\.\/(uploads\/[^"]+)"([^>]*?)>/g, '<img$1src="/$2"$3>')
+    // Optionally remove data-mce-src attributes from <img> tags
+    .replace(/<img([^>]*?) data-mce-src="[^"]*"([^>]*?)>/g, '<img$1$2>');
+}
+
+
+
 
 const router = express.Router();
 
@@ -23,7 +33,7 @@ const router = express.Router();
 //       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 //     `, [name, description, content, req.filePath || image, meta_title, meta_description, meta_keywords, slug]);
 
-//         console.log(result, "<= This is the result fot thr region add query.")
+//         // console.log(result, "<= This is the result fot thr region add query.")
 
 //         res.redirect('/admin/region/region');
 //     } catch (err) {
@@ -39,11 +49,13 @@ router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (r
             return res.status(400).send('Name, description, and image are required.');
         }
 
+        // Clean content if needed
+        const cleanContent = removeDataMceSrc(content);
         // 1. Insert into `region` table
         const [regionResult] = await db.query(`
             INSERT INTO region (name, description, content, image, slug)
             VALUES (?, ?, ?, ?, ?)
-        `, [name, description, content, req.filePath || image, slug]);
+        `, [name, description, cleanContent, req.filePath || image, slug]);
 
         const regionId = regionResult.insertId;
 
@@ -56,7 +68,7 @@ router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (r
         res.redirect('/admin/region/region');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error saving region.');
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
@@ -117,16 +129,16 @@ router.post('/region/add', isAdmin, dynamicImageUpload.single('image'), async (r
 //             const [rows] = await db.query('SELECT image FROM region WHERE id = ?', [id]);
 //             if (rows.length > 0) {
 //                 oldImagePath = rows[0].image;
-//                 console.log(image, oldImagePath);
+//                 // console.log(image, oldImagePath);
 //             }
 //         }
 
 //         if (image && oldImagePath && oldImagePath !== image) {
 //             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-//             console.log(fullOldImagePath);
+//             // console.log(fullOldImagePath);
 //             fs.unlink(fullOldImagePath, (err) => {
 //                 if (err) console.error('Error deleting old image:', err);
-//                 else console.log('Old image deleted:', fullOldImagePath);
+//                 else // console.log('Old image deleted:', fullOldImagePath);
 //             });
 //         }
 
@@ -211,26 +223,26 @@ router.post('/region/update', isAdmin, dynamicImageUpload.single('image'), async
         res.redirect('/admin/region/region');
     } catch (err) {
         console.error('Error updating region:', err);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
 router.get('/region/delete/:id', isAdmin, async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("admin is deleting a region in the dest controller =>", id);
+        // console.log("admin is deleting a region in the dest controller =>", id);
         const [rows] = await db.query('SELECT image FROM region WHERE id = ?', [id]);
         if (rows.length > 0) {
             const fullImagePath = path.join(process.cwd(), 'public', rows[0].image);
             fs.unlink(fullImagePath, (err) => {
-                console.log(err)
+                // console.log(err)
             })
         }
         await db.query('DELETE FROM region WHERE id = ?', [id]);
         res.json({ success: true });
     } catch (error) {
         console.error('Error deleting region:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 })
 
@@ -249,7 +261,7 @@ router.get('/region/delete/:id', isAdmin, async (req, res) => {
 //             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 //         `, [name, description, content, image, region_id, meta_title, meta_description, meta_keywords, slug]);
 
-//         console.log(result, "<= State added");
+//         // console.log(result, "<= State added");
 
 //         res.redirect('/admin/state/state');
 //     } catch (err) {
@@ -319,16 +331,16 @@ router.get('/region/delete/:id', isAdmin, async (req, res) => {
 //             const [rows] = await db.query('SELECT image FROM state WHERE id = ?', [id]);
 //             if (rows.length > 0) {
 //                 oldImagePath = rows[0].image;
-//                 console.log(image, oldImagePath);
+//                 // console.log(image, oldImagePath);
 //             }
 //         }
 
 //         if (image && oldImagePath && oldImagePath !== image) {
 //             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-//             console.log(fullOldImagePath);
+//             // console.log(fullOldImagePath);
 //             fs.unlink(fullOldImagePath, (err) => {
 //                 if (err) console.error('Error deleting old image:', err);
-//                 else console.log('Old image deleted:', fullOldImagePath);
+//                 else // console.log('Old image deleted:', fullOldImagePath);
 //             });
 //         }
 
@@ -352,10 +364,13 @@ router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (re
 
         const image = req.filePath || req.body.image;
 
+        // Clean content if needed
+        const cleanContent = removeDataMceSrc(content);
+
         const [result] = await db.query(`
             INSERT INTO state (name, description, content, image, region_id, slug)
             VALUES (?, ?, ?, ?, ?, ?)
-        `, [name, description, content, image, region_id, slug]);
+        `, [name, description, cleanContent, image, region_id, slug]);
 
         const stateId = result.insertId;
 
@@ -364,12 +379,12 @@ router.post('/state/add', isAdmin, dynamicImageUpload.single('image'), async (re
             VALUES (?, ?, ?, ?, ?)
         `, ['state', stateId, meta_title, meta_description, meta_keywords]);
 
-        console.log(result, "<= State added");
+        // console.log(result, "<= State added");
 
         res.redirect('/admin/state/state');
     } catch (err) {
         console.error('Error adding state:', err);
-        res.status(500).send('Error saving state.');
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
@@ -446,7 +461,7 @@ router.post('/state/update/:id', isAdmin, dynamicImageUpload.single('image'), as
         res.redirect('/admin/state/state');
     } catch (err) {
         console.error('Error updating state:', err);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
@@ -458,14 +473,14 @@ router.get('/state/delete/:id', isAdmin, async (req, res) => {
         if (rows.length > 0) {
             const fullImagePath = path.join(process.cwd(), 'public', rows[0].image);
             fs.unlink(fullImagePath, (err) => {
-                console.log(err)
+                // console.log(err)
             });
         }
         await db.query('DELETE FROM state WHERE id = ?', [id]);
         res.redirect('/admin/state/state');
     } catch (error) {
         console.error('Error deleting state:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 
 })
@@ -485,7 +500,7 @@ router.get('/state/delete/:id', isAdmin, async (req, res) => {
 //             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 //         `, [name, description, content, image, state_id, meta_title, meta_description, meta_keywords, slug]);
 
-//         console.log(result, "<= city added");
+//         // console.log(result, "<= city added");
 
 //         res.redirect('/admin/city/city');
 //     } catch (err) {
@@ -555,16 +570,16 @@ router.get('/state/delete/:id', isAdmin, async (req, res) => {
 //             const [rows] = await db.query('SELECT image FROM city WHERE id = ?', [id]);
 //             if (rows.length > 0) {
 //                 oldImagePath = rows[0].image;
-//                 console.log(image, oldImagePath);
+//                 // console.log(image, oldImagePath);
 //             }
 //         }
 
 //         if (image && oldImagePath && oldImagePath !== image) {
 //             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-//             console.log(fullOldImagePath);
+//             // console.log(fullOldImagePath);
 //             fs.unlink(fullOldImagePath, (err) => {
 //                 if (err) console.error('Error deleting old image:', err);
-//                 else console.log('Old image deleted:', fullOldImagePath);
+//                 else // console.log('Old image deleted:', fullOldImagePath);
 //             });
 //         }
 
@@ -587,11 +602,14 @@ router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req
         }
 
         const image = req.filePath || req.body.image;
+        // console.log(content, "This is the image path in the city add route");
+        const cleanContent = removeDataMceSrc(content);
+        // console.log(cleanContent, "This is the cleaned content in the city add route");
 
         const [result] = await db.query(`
             INSERT INTO city (name, description, content, image, state_id, slug)
             VALUES (?, ?, ?, ?, ?, ?)
-        `, [name, description, content, image, state_id, slug]);
+        `, [name, description, cleanContent, image, state_id, slug]);
 
         const cityId = result.insertId;
 
@@ -600,11 +618,11 @@ router.post('/city/add', isAdmin, dynamicImageUpload.single('image'), async (req
             VALUES (?, ?, ?, ?, ?)
         `, ['city', cityId, meta_title, meta_description, meta_keywords]);
 
-        console.log(result, "<= city added");
+        // console.log(result, "<= city added");
         res.redirect('/admin/city/city');
     } catch (err) {
         console.error('Error adding city:', err);
-        res.status(500).send('Error saving city.');
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
@@ -614,6 +632,7 @@ router.post('/city/update/:id', isAdmin, dynamicImageUpload.single('image'), asy
         const id = req.params.id;
         const { name, description, content, state_id, meta_title, meta_description, meta_keywords, slug } = req.body;
         const image = req.filePath;
+        // console.log(content, "This is the image path in the city update route");
 
         if (!id) {
             return res.status(400).send({ message: "Missing city ID" });
@@ -683,7 +702,7 @@ router.post('/city/update/:id', isAdmin, dynamicImageUpload.single('image'), asy
         res.redirect('/admin/city/city');
     } catch (err) {
         console.error('Error updating city:', err);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 });
 
@@ -705,7 +724,7 @@ router.get('/city/delete/:id', isAdmin, async (req, res) => {
     }
     catch (err) {
         console.error('Error deleting city:', err);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: err.sqlMessage || 'Error saving Data.' });
     }
 })
 

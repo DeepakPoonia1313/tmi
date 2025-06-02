@@ -14,11 +14,11 @@ router.get('/package/package', isAdmin, async (req, res) => {
             JOIN slug ON package.slug = slug.id
         `);
 
-        console.log(packages, 'packages');
+        // console.log(packages, 'packages');
         res.render('admin/package/package', { packages });
     } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Internal Server Error" });
+        // console.log(error);
+        res.status(500).send({ message: "Internal Server Error", error });
     }
 });
 
@@ -42,7 +42,7 @@ router.get('/package/renderEditPage/:id', isAdmin, async (req, res) => {
         });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 
@@ -56,7 +56,7 @@ router.get('/package/renderAddPage', isAdmin, async (req, res) => {
             FROM theme
             JOIN slug ON theme.slug = slug.id
         `);
-        console.log(themes, 'themes');
+        // console.log(themes, 'themes');
         res.render('admin/package/add', {
             breadcrumbs: [
                 { label: 'Dashboard', url: '/admin/dashboard' },
@@ -67,7 +67,7 @@ router.get('/package/renderAddPage', isAdmin, async (req, res) => {
         });
     } catch (error) {
         console.error('Error rendering add page:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error', error });
     }
 });
 
@@ -89,11 +89,10 @@ router.get('/package/renderpackageDetail/:id', isAdmin, async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).send({ message: "package not found" });
         }
-        // console.log(rows)
         res.render('admin/package/show', { package: rows[0] });
     } catch (err) {
         console.error(err);
-        res.status(500).send({ message: "Error fetching data" });
+        res.status(500).send({ message: "Error fetching data", error: err });
     }
 });
 

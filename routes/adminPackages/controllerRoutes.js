@@ -69,14 +69,14 @@ router.post('/package/add', isAdmin, dynamicImageUpload.single('image'), async (
             );
         }
 
-        console.log('Package created with ID:', packageId);
+        // console.log('Package created with ID:', packageId);
         res.redirect('/admin/package/package');
     } catch (err) {
         console.error(err);
         if (err.code === 'ER_DUP_ENTRY') {
             res.status(400).send('Title or slug must be unique.');
         } else {
-            res.status(500).send('Error saving package.');
+            res.status(500).send({'Error saving package.': err});
         }
     }
 });

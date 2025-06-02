@@ -253,15 +253,8 @@
                         </div>
 
 
-                        <!-- Content Section -->
-                        <!-- <div class="form-section">
-                            <h5><i class="fas fa-align-left me-2"></i> Region Content</h5>
-                            <div class="editor-container mb-3">
-                                <div id="editor"><%- region.content %></div>
-                            </div>
-                            <input type="hidden" name="content" id="content">
-                        </div> -->
-                        <div class="editor-container mb-3 ">
+
+                        <!-- <div class="editor-container mb-3 ">
                             <div class="row">
                                 <div class="col-lg-8">
                                     <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
@@ -297,6 +290,53 @@
                                     </div>
                                 </div>
                             </div>
+                        </div> -->
+                        <div class="editor-container mb-3 ">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <!-- <div id="editor" class="border rounded"
+                                            style="min-height: 300px; max-height: 300px; overflow-y: auto; height: auto;">
+                                        </div> -->
+                                        <textarea id="editor" name="content"><%- region.content %></textarea>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-4">
+                                    <div class="gallery-section"
+                                        style="border-left: 1px solid #ccc; padding-left: 10px;">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="mb-0">Previously Uploaded Images</h5>
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                id="gallery-image-button">
+                                                <i class="fas fa-plus"></i> Add Image
+                                            </button>
+                                        </div>
+
+                                        <div style="max-height: 350px; overflow-y: auto;">
+                                            <% if (images && images.length> 0) { %>
+                                                <div class="row g-2">
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div class="col-6 col-md-4">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image"
+                                                                style="height: 120px; width: 100%; object-fit: cover; cursor: pointer;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-center py-3">
+                                                        <p class="text-muted">No previously uploaded images.</p>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Form Actions -->
@@ -313,14 +353,6 @@
             </div>
         </div>
 
-        <!-- Floating Image Toolbar -->
-        <div id="image-toolbar">
-            <span data-align="left">⬅️ Left</span>
-            <span data-align="center">⬆️ Center</span>
-            <span data-align="right">➡️ Right</span>
-        </div>
-
-        <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
         <script>
             document.getElementById('image-input')?.addEventListener('change', function (e) {
                 const preview = document.getElementById('new-image-preview');
@@ -339,121 +371,82 @@
             });
         </script>
 
+        <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
+            referrerpolicy="origin"></script>
+
         <script>
-            const quill = new Quill('#editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ header: [1, 2, false] }],
-                        ['bold', 'italic', 'underline'],
-                        ['blockquote', 'code-block'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        ['link', 'image'],
-                        ['clean']
-                    ]
+            tinymce.init({
+                selector: '#editor',
+                height: 500,
+                plugins: 'image link code lists table',
+                toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | link | table | code',
+                menubar: false,
+                setup: function (editor) {
+                    // On form submit, set hidden input with editor content
+                    // document.querySelector('form').addEventListener('submit', function () {
+                    //     document.querySelector('#content').value = editor.getContent();
+                    // });
+
+                    // Expose function globally to insert image into editor
+                    window.insertToEditor = function (imageUrl) {
+                        editor.insertContent(`<img style="max-width: 300px;" src="${imageUrl}" />`);
+                    };
+
+                    // Handle custom image upload from the button
+                    document.getElementById('gallery-image-button').addEventListener('click', () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.click();
+
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            const formData = new FormData();
+                            formData.append('image', file);
+
+                            try {
+                                const res = await fetch('/upload/region/content', {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+
+                                if (!res.ok) throw new Error('Upload failed');
+
+                                const data = await res.json();
+                                const url = data.file;
+
+                                // Insert into editor
+                                editor.insertContent(`<img style="max-width: 300px;" src="${url}" />`);
+
+                                // Add to gallery
+                                const row = document.querySelector('.gallery-section .row.g-2');
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-6 col-md-4';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image';
+                                img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            } catch (err) {
+                                console.error('Image upload failed', err);
+                            }
+                        };
+                    });
                 }
             });
-
-            // Set initial content
-            quill.root.innerHTML = `<%- region.content %>`;
-
-            // On submit, copy to hidden input
-            document.querySelector('form').addEventListener('submit', () => {
-                document.querySelector('#content').value = quill.root.innerHTML;
-            });
-
-            // Upload image handler
-            const toolbar = quill.getModule('toolbar');
-            toolbar.addHandler('image', () => {
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
-
-                input.onchange = async () => {
-                    const file = input.files[0];
-                    const formData = new FormData();
-                    formData.append('image', file);
-
-                    try {
-                        const res = await fetch('/upload/region/content', {
-                            method: 'POST',
-                            body: formData,
-                        });
-
-                        if (!res.ok) throw new Error('Upload failed');
-
-                        const data = await res.json();
-                        const url = data.file;
-
-                        const row = document.querySelector('.gallery-section .row.g-2');
-                        const colDiv = document.createElement('div');
-                        colDiv.className = 'col-6 col-md-4';
-
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.alt = 'Uploaded Image';
-                        img.className = 'img-fluid rounded selectable-image';
-                        img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
-                        img.setAttribute('onclick', `insertToEditor('${url}')`);
-
-                        colDiv.appendChild(img);
-                        row.prepend(colDiv); // ✅ prepend to show newest first
-
-                        const range = quill.getSelection();
-                        const imgTag = `<img style="max-width: 300px;" src="${url}">`;
-                        quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
-                    } catch (err) {
-                        console.error('Image upload failed', err);
-                    }
-                };
-            });
-
-            function insertToEditor(imageUrl) {
-                const range = quill.getSelection();
-                if (range) {
-                    quill.insertEmbed(range.index, 'image', imageUrl);
-                    quill.setSelection(range.index + 1);
-                }
-            }
-            // Floating image toolbar
-            const imageToolbar = document.getElementById('image-toolbar');
-
-            quill.root.addEventListener('click', (e) => {
-                if (e.target.tagName === 'IMG') {
-                    const rect = e.target.getBoundingClientRect();
-                    imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
-                    imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
-                    imageToolbar.style.display = 'flex';
-                    imageToolbar.currentImage = e.target;
-                } else {
-                    imageToolbar.style.display = 'none';
-                }
-            });
-
-            imageToolbar.addEventListener('click', (e) => {
-                const el = imageToolbar.currentImage;
-                const align = e.target.dataset.align;
-                if (!el || !align) return;
-
-                if (align === 'left') {
-                    el.style.float = 'left';
-                    el.style.marginRight = '50px';
-                    el.style.marginLeft = '0';
-                    el.style.display = '';
-                } else if (align === 'right') {
-                    el.style.float = 'right';
-                    el.style.marginLeft = '50px';
-                    el.style.marginRight = '0';
-                    el.style.display = '';
-                } else if (align === 'center') {
-                    el.style.float = '';
-                    el.style.marginLeft = 'auto';
-                    el.style.marginRight = 'auto';
-                    el.style.display = 'block';
-                }
-
-                imageToolbar.style.display = 'none';
+        </script>
+        <script>
+            document.getElementById('name').addEventListener('input', function () {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+                document.getElementById('slug').value = slug;
             });
         </script>
         <%- include('../layout/footer') %>

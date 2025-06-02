@@ -18,7 +18,6 @@ const isAdmin = async (req, res, next) => {
         }
         req.admin = admin;
         req.adminId = decoded.adminId;
-        // console.log("admin id id this =>  ",req.adminId);
         next();
     } catch (error) {
         console.error("Authentication Error:", error);

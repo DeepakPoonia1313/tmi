@@ -58,7 +58,7 @@
 //         );
 //     }
 
-//     console.log('✅ States and cities seeded successfully.');
+//     // console.log('✅ States and cities seeded successfully.');
 // };
 
 // seedStatesAndCities()
@@ -127,7 +127,7 @@ const seedStatesAndCities = async () => {
         );
     }
 
-    console.log('✅ States and cities seeded successfully.');
+    // console.log('✅ States and cities seeded successfully.');
 };
 
 seedStatesAndCities()

@@ -12,7 +12,7 @@ router.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
         const [admin] = await db.query("SELECT * FROM admins WHERE username = ?", [username]);
-        console.log(admin, admin.length)
+        // console.log(admin, admin.length)
 
         if (!admin) {
             return res.render('admin/login', { error: 'Invalid username or password' });
@@ -37,6 +37,7 @@ router.post('/login', async (req, res) => {
         console.error("Admin Login Error:", err);
         return res.render("admin/login", {
             error: "Server error. Please try again.",
+            errorMessage: err.message,
             success: null,
         });
     }
@@ -72,6 +73,7 @@ router.get('/dashboard', isAdmin, async (req, res) => {
       tableNames: [],
       tableDetails: {},
       error: 'Could not load table details',
+      errorMessage: err.message,
     });
   }
 });

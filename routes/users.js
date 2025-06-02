@@ -33,7 +33,7 @@ router.post('/add', async (req, res) => {
       'INSERT INTO users (name, email, age) VALUES (?, ?, ?)',
       [name, email, age]
     );
-    console.log(result);
+    // console.log(result);
     res.json({
       message: '✅ User added successfully.',
       userId: result.insertId,

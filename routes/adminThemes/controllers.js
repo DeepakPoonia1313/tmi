@@ -5,6 +5,7 @@ import isAdmin from '../../middleware/adminMiddleware.js';
 import createDynamicMulterMiddleware from '../../utils/multerDestinaProps.js';
 import path from 'path';
 import fs from 'fs';
+import { removeDataMceSrc } from '../adminDestRoutes/destControllerRoutes.js';
 
 const router = express.Router();
 const dynamicImageUpload = createDynamicMulterMiddleware();
@@ -27,6 +28,8 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
             return res.status(400).send('Name and slug are required.');
         }
 
+        const cleanContent = removeDataMceSrc(content);
+
         const [result] = await db.query(`
             INSERT INTO theme (
                 name, slug, description, content,
@@ -36,14 +39,14 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
             name,
             slug,
             description || null,
-            content || null,
+            cleanContent || null,
             meta_title || null,
             meta_description || null,
             meta_keywords || null,
             req.filePath || image || null
         ]);
 
-        console.log(result, '<= Theme insert result');
+        // console.log(result, '<= Theme insert result');
 
         res.redirect('/admin/theme/theme');
     } catch (err) {
@@ -51,7 +54,7 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
         if (err.code === 'ER_DUP_ENTRY') {
             res.status(400).send('Slug must be unique.');
         } else {
-            res.status(500).send('Error saving theme.');
+            res.status(500).send({'Error saving theme.': err});
         }
     }
 });
@@ -123,13 +126,13 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
             const [rows] = await db.query('SELECT image FROM theme WHERE id = ?', [id]);
             if (rows.length > 0) {
                 oldImagePath = rows[0].image;
-                console.log(image, oldImagePath);
+                // console.log(image, oldImagePath);
             }
         }
 
         if (image && oldImagePath && oldImagePath !== image) {
             const fullOldImagePath = path.join(process.cwd(), 'public', oldImagePath);
-            console.log(fullOldImagePath);
+            // console.log(fullOldImagePath);
             fs.unlink(fullOldImagePath, (err) => {
                 if (err) console.error('Error deleting old image:', err);
                 else console.log('Old image deleted:', fullOldImagePath);
@@ -143,26 +146,26 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
         res.redirect('/admin/theme/theme');
     } catch (err) {
         console.error('Error updating theme:', err);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error', error: err });
     }
 });
 
 router.post('/theme/delete/:id', isAdmin, async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("admin is deleting a theme in the dest controller =>", id);
+        // console.log("admin is deleting a theme in the dest controller =>", id);
         const [rows] = await db.query('SELECT image FROM theme WHERE id = ?', [id]);
         if (rows.length > 0) {
             const fullImagePath = path.join(process.cwd(), 'public', rows[0].image);
             fs.unlink(fullImagePath, (err) => {
-                console.log(err)
+                console.error(err)
             })
         }
         await db.query('DELETE FROM theme WHERE id = ?', [id]);
         res.json({ success: true });
     } catch (error) {
         console.error('Error deleting theme:', error);
-        res.status(500).send({ message: 'Internal server error' });
+        res.status(500).send({ message: 'Internal server error', error });
     }
 })
 

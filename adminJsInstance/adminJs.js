@@ -188,13 +188,13 @@ export const setupAdmin = async () => {
                     actions: {
                         new: {
                             after: async (response, request, context) => {
-                                console.log('New region created:', context.record?.params); // renamed from "city" to "region"
+                                // console.log('New region created:', context.record?.params); // renamed from "city" to "region"
                                 return response;
                             },
                         },
                         edit: {
                             after: async (response, request, context) => {
-                                console.log('Region updated:', context.record?.params); // renamed from "city" to "region"
+                                // console.log('Region updated:', context.record?.params); // renamed from "city" to "region"
                                 return response;
                             },
                         },
@@ -236,13 +236,13 @@ export const setupAdmin = async () => {
                     actions: {
                         new: {
                             after: async (response, request, context) => {
-                                console.log('New city created:', context.record?.params);
+                                // console.log('New city created:', context.record?.params);
                                 return response;
                             },
                         },
                         edit: {
                             after: async (response, request, context) => {
-                                console.log('City updated:', context.record?.params);
+                                // console.log('City updated:', context.record?.params);
                                 return response;
                             },
                         },
@@ -279,13 +279,13 @@ export const setupAdmin = async () => {
                     actions: {
                         new: {
                             after: async (response, request, context) => {
-                                console.log('New city created:', context.record?.params);
+                                // console.log('New city created:', context.record?.params);
                                 return response;
                             },
                         },
                         edit: {
                             after: async (response, request, context) => {
-                                console.log('City updated:', context.record?.params);
+                                // console.log('City updated:', context.record?.params);
                                 return response;
                             },
                         },
