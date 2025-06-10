@@ -20,7 +20,7 @@ router.get('/create-table', async (req, res) => {
     res.send('✅ Users table created successfully.');
   } catch (err) {
     console.error(err);
-    res.status(500).send('❌ Error creating users table.');
+    res.status(500).json('❌ Error creating users table.');
   }
 });
 
@@ -40,7 +40,7 @@ router.post('/add', async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send(err.sqlMessage);
+    res.status(500).json(err.sqlMessage);
   }
 });
 
@@ -52,7 +52,7 @@ router.get('/all', async (req, res) => {
     res.json({ users, tables });
   } catch (err) {
     console.error(err);
-    res.status(500).send('❌ Error fetching users.');
+    res.status(500).json('❌ Error fetching users.');
   }
 });
 

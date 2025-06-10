@@ -78,7 +78,7 @@
                 <ol class="breadcrumb small px-2 py-2 bg-light rounded">
                     <li class="breadcrumb-item"><a href="/admin/dashboard">
                             Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="/admin/hotel/list"> Hotels</a>
+                    <li class="breadcrumb-item"><a href="/admin/hotel/hotel"> Hotels</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">Hotel
                         Details</li>
@@ -88,7 +88,7 @@
             <div class="card detail-card mb-4">
                 <div class="card-header detail-card-header text-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-hotel me-2"></i> Hotel Details</h5>
+                        <h5 class="mb-0">Hotel Details</h5>
                         <span class="badge bg-light text-dark">ID: <%= hotel.id %></span>
                     </div>
                 </div>
@@ -97,35 +97,35 @@
                         <!-- Left Column -->
                         <div class="col-lg-6">
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-tag me-1"></i> Name</div>
+                                <div class="detail-label"> Name</div>
                                 <div class="detail-value">
                                     <%= hotel.name %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-map-marker-alt me-1"></i> Address</div>
+                                <div class="detail-label"> Address</div>
                                 <div class="detail-value">
                                     <%= hotel.address %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-phone me-1"></i> Phone</div>
+                                <div class="detail-label"> Phone</div>
                                 <div class="detail-value">
                                     <%= hotel.phone %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-envelope me-1"></i> Email</div>
+                                <div class="detail-label"> Email</div>
                                 <div class="detail-value">
                                     <%= hotel.email %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-image me-1"></i> Main Image</div>
+                                <div class="detail-label"> Featured Image</div>
                                 <div class="detail-value">
                                     <% if (hotel.mainImage) { %>
                                         <img src="<%= hotel.mainImage %>" alt="Hotel Image" class="img-preview">
@@ -134,25 +134,42 @@
                                             <% } %>
                                 </div>
                             </div>
+                            <div class="mb-3">
+                                <div class="detail-label"> Additional Images</div>
+                                <div class="detail-value">
+                                    <% if (hotelImages.length > 0) { %>
+                                        <div class="row">
+                                            <% hotelImages.forEach(function(image) { %>
+                                                <div class="col-6 col-md-4 mb-2">
+                                                    <img src="<%= image.image_url %>" alt="Hotel Image"
+                                                        class="img-preview">
+                                                </div>
+                                            <% }); %>
+                                        </div>
+                                        <% } else { %>
+                                            <span class="text-muted">No additional images available</span> 
+                                            <% } %>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Right Column -->
                         <div class="col-lg-6">
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-star me-1"></i> Star Rating</div>
+                                <div class="detail-label"> Star Rating</div>
                                 <div class="detail-value">
                                     <%= hotel.star_rating %> ★
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-money-bill-wave me-1"></i> Price/Day</div>
+                                <div class="detail-label">Price/Day</div>
                                 <div class="detail-value">₹ <%= hotel.price_per_night %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-globe me-1"></i> Website</div>
+                                <div class="detail-label"> Website</div>
                                 <div class="detail-value">
                                     <% if (hotel.website) { %>
                                         <a href="<%= hotel.website %>" target="_blank">
@@ -165,33 +182,33 @@
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-check me-1"></i> Featured</div>
+                                <div class="detail-label"> Featured</div>
                                 <div class="detail-value">
                                     <%= hotel.is_featured ? 'Yes' : 'No' %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-toggle-on me-1"></i> Active</div>
+                                <div class="detail-label">Active</div>
                                 <div class="detail-value">
                                     <%= hotel.is_active ? 'Active' : 'Inactive' %>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <div class="detail-label"><i class="fas fa-calendar-alt me-1"></i> Timestamps</div>
+                                <div class="detail-label"> Timestamps</div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <small class="text-muted">Created</small>
                                         <div class="detail-value">
-                                            <i class="far fa-calendar-plus me-1"></i>
+                                            
                                             <%= new Date(hotel.created_at).toLocaleString() %>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <small class="text-muted">Updated</small>
                                         <div class="detail-value">
-                                            <i class="far fa-calendar-check me-1"></i>
+                                            
                                             <%= new Date(hotel.updated_at).toLocaleString() %>
                                         </div>
                                     </div>
@@ -203,14 +220,14 @@
                     <!-- Full Width Sections -->
                     <div class="row mt-2">
                         <div class="col-12">
-                            <div class="detail-label"><i class="fas fa-align-left me-1"></i> Description</div>
+                            <div class="detail-label"> Description</div>
                             <div class="content-box">
                                 <%- hotel.description || '<span class="text-muted">No description available</span>' %>
                             </div>
                         </div>
 
                         <div class="col-12 mt-3">
-                            <div class="detail-label"><i class="fas fa-file-alt me-1"></i> Content</div>
+                            <div class="detail-label"> Content</div>
                             <div class="content-box" style="max-height: 300px; overflow-y: scroll;">
                                 <%- hotel.content || '<span class="text-muted">No content available</span>' %>
                             </div>
@@ -232,9 +249,9 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="detail-label">Meta Keywords</div>
+                            <div class="detail-label">Canonical Url</div>
                             <div class="detail-value">
-                                <%= hotel.meta_keywords || 'N/A' %>
+                                <%= hotel.canonical_url || 'N/A' %>
                             </div>
                         </div>
                     </div>
@@ -243,13 +260,13 @@
                     <div class="row mt-4">
                         <div class="col-12 action-btns">
                             <a href="/admin/hotel/renderEditPage/<%= hotel.id %>" class="btn btn-warning">
-                                <i class="fas fa-edit me-1"></i> Edit Hotel
+                                 Edit Hotel
                             </a>
                             <a href="/admin/hotel/hotel" class="btn btn-secondary ms-2">
-                                <i class="fas fa-arrow-left me-1"></i> Back to List
+                                Back to List
                             </a>
                             <button class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                                <i class="fas fa-trash-alt me-1"></i> Delete
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -270,7 +287,7 @@
                         <p>Are you sure you want to delete the hotel "<strong>
                                 <%= hotel.name %>
                             </strong>"?</p>
-                        <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>This action cannot be
+                        <p class="text-danger">This action cannot be
                             undone.</p>
                     </div>
                     <div class="modal-footer">

@@ -1,0 +1,181 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+        <div class="container mt-4">
+
+            <!-- Card with improved styling -->
+            <div class="card border-0 shadow-lg">
+                <div class="card-header text-black py-3">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 fw-bold">Add New Region</h5>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form action="/admin/region/add?module=region&moduleId=region" method="POST"
+                        enctype="multipart/form-data">
+                        <!-- Name -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-muted">Region Name</label>
+                            <div class="input-group">
+                                <input name="name" id="name" class="form-control form-control-lg" maxlength="50"
+                                    required placeholder="Enter region name" />
+                            </div>
+                        </div>
+
+                        <div class="editor-container mb-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <textarea id="editor" name="content" class="form-control"
+                                            style="min-height: 300px;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="gallery-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="mb-0">Gallery</h5>
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                id="gallery-image-button">
+                                                Add
+                                            </button>
+                                        </div>
+
+                                        <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                                            <% if (images && images.length> 0) { %>
+                                                <div class="row g-3">
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div
+                                                            class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image border border-secondary"
+                                                                style="max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-center py-3">
+                                                        <p class="text-muted">No previously uploaded images.</p>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="reset" class="btn btn-outline-secondary px-4">
+                                Reset
+                            </button>
+                            <button type="submit" class="btn btn-success px-4">
+                                Save Region
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optional: Add some custom CSS for better visual effects -->
+        <style>
+            .border-dashed {
+                border: 2px dashed #dee2e6;
+            }
+
+            .card-header {
+                border-bottom: none;
+            }
+
+            .form-control:focus,
+            .form-select:focus {
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+            }
+
+            #file-upload+label {
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            #file-upload+label:hover {
+                transform: translateY(-2px);
+            }
+        </style>
+
+
+        <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
+            referrerpolicy="origin"></script>
+
+        <script>
+            tinymce.init({
+                selector: '#editor',
+                height: 500,
+                plugins: 'image link code lists table',
+                toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | link | table | code',
+                menubar: false,
+                setup: function (editor) {
+                    // On form submit, set hidden input with editor content
+                    // document.querySelector('form').addEventListener('submit', function () {
+                    //     document.querySelector('#content').value = editor.getContent();
+                    // });
+
+                    // Expose function globally to insert image into editor
+                    window.insertToEditor = function (imageUrl) {
+                        editor.insertContent(`<img style="max-width: 300px;" src="${imageUrl}" />`);
+                    };
+
+                    // Handle custom image upload from the button
+                    document.getElementById('gallery-image-button').addEventListener('click', () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.click();
+
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            const formData = new FormData();
+                            formData.append('image', file);
+
+                            try {
+                                const res = await fetch('/upload/region/content', {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+
+                                if (!res.ok) throw new Error('Upload failed');
+
+                                const data = await res.json();
+                                const url = data.file;
+
+                                // Insert into editor
+                                editor.insertContent(`<img style="max-width: 300px;" src="${url}" />`);
+
+                                // Add to gallery
+                                const row = document.querySelector('.gallery-section .row.g-2');
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-6 col-md-4';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image';
+                                img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            } catch (err) {
+                                console.error('Image upload failed', err);
+                            }
+                        };
+                    });
+                }
+            });
+        </script>
+
+        <%- include('../layout/footer') %>

@@ -1,6 +1,646 @@
 <%- include('../layout/header') %>
-<%- include('../layout/sidebar') %>
+    <%- include('../layout/sidebar') %>
 
-<h1>This is the state add page.</h1>
+        <div class="container mt-4">
+            <!-- Enhanced Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb p-2 bg-light rounded-3" style="--bs-breadcrumb-divider: '›';">
+                    <% breadcrumbs.forEach((crumb, index)=> { %>
+                        <% if (crumb.url && index !==breadcrumbs.length - 1) { %>
+                            <li class="breadcrumb-item">
+                                <a href="<%= crumb.url %>" class="text-decoration-none text-primary">
+                                    <% if (index===0) { %>
+                                        <% } %>
+                                            <%= crumb.label %>
+                                </a>
+                            </li>
+                            <% } else { %>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    <%= crumb.label %>
+                                </li>
+                                <% } %>
+                                    <% }) %>
+                </ol>
+            </nav>
 
-<%- include('../layout/footer') %>
+            <!-- Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 fw-semibold">Add New Package</h5>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form action="/admin/package/add?module=package&moduleId=package" method="POST"
+                        enctype="multipart/form-data">
+                        <input type="hidden" name="module" value="package">
+                        <input type="hidden" name="moduleId" value="package">
+                        <div class="row g-4">
+                            <!-- Left Column -->
+                            <div class="col-lg-6">
+                                <!-- Title -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Package Title <span
+                                            class="text-danger">*</span></label>
+                                    <div class="input-group">
+
+                                        <input type="text" name="title" id="title" class="form-control" maxlength="255"
+                                            required placeholder="Enter package title" />
+                                    </div>
+                                </div>
+
+                                <!-- Slug -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Slug <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+
+                                        <input type="text" name="slug" id="slug" class="form-control" required
+                                            placeholder="Enter slug" />
+                                    </div>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Price</label>
+                                    <div class="input-group">
+
+                                        <input type="number" name="price" id="price" class="form-control" step="0.01"
+                                            placeholder="Enter package price" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Duration-Days</label>
+                                    <div class="input-group">
+
+                                        <input type="number" name="duration_days" id="duration_days"
+                                            class="form-control" step="1" placeholder="Enter package duration (days)"
+                                            max="30" oninput="this.value = Math.min(30, Math.max(1, this.value))" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Duration-Nights</label>
+                                    <div class="input-group">
+                                        <input type="number" name="duration_nights" id="duration_nights"
+                                            class="form-control" step="1" placeholder="Enter package duration (nights)"
+                                            max="30" oninput="this.value = Math.min(30, Math.max(1, this.value))" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Best time to visit</label>
+                                    <div class="input-group">
+
+                                        <input type="text" name="best_time" id="best_time" class="form-control"
+                                            maxlength="255" required placeholder="Best time to visit, eg: (may-june)" />
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium" for="themeInput">Theme</label>
+
+                                    <div id="selectedThemesContainer" class="mb-2 d-flex flex-wrap align-items-center">
+                                    </div>
+
+                                    <input class="form-control" list="themeDatalistOptions" id="themeInput"
+                                        placeholder="Type to search themes...">
+                                    <datalist id="themeDatalistOptions">
+                                        <% themes.forEach(theme=> { %>
+                                            <option value="<%= theme.name %>" data-id="<%= theme.id %>"></option>
+                                            <% }); %>
+                                    </datalist>
+
+                                    <input type="hidden" name="theme" id="selectedThemesInput">
+                                </div>
+
+                                <!-- Inclusions -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Inclusions</label>
+                                    <textarea name="inclusions" id="inclusions" class="form-control" rows="3"
+                                        placeholder="What's included in the package (comma separated)"></textarea>
+                                </div>
+
+                                <!-- Exclusions -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Exclusions</label>
+                                    <textarea name="exclusions" id="exclusions" class="form-control" rows="3"
+                                        placeholder="What's not included in the package (comma separated)"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-lg-6">
+                                <!-- Main Image Upload -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Featured Image</label>
+                                    <div class="border rounded p-3 text-center bg-light">
+                                        <div id="image-preview-container" class="mb-2" style="min-height: 120px;">
+                                            <img id="image-preview" src="#" alt="Preview"
+                                                class="img-fluid rounded d-none" style="max-height: 120px;">
+                                            <div id="image-placeholder"
+                                                class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
+                                                <span>Featured image preview</span>
+                                            </div>
+                                        </div>
+                                        <input type="file" class="form-control" name="image" id="image" accept="image/*"
+                                            onchange="previewImage(event)">
+                                        <small class="text-muted">Recommended: 800x600px, JPG or PNG</small>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Images -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Additional Images</label>
+                                    <div class="border rounded p-3 text-center bg-light">
+                                        <div id="additional-images-preview" class="d-flex flex-wrap gap-2 mb-2">
+                                            <div class="d-flex flex-column align-items-center justify-content-center w-100 text-muted"
+                                                style="min-height: 80px;">
+                                                <span>Additional images preview (max 10)</span>
+                                            </div>
+                                        </div>
+                                        <input type="file" class="form-control" name="package_images"
+                                            id="package_images" accept="image/*" multiple max="10"
+                                            onchange="previewAdditionalImages(event)">
+                                        <small class="text-muted">Select multiple images (max 10)</small>
+                                    </div>
+                                </div>
+
+                                <!-- Status Toggles -->
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="featured"
+                                                id="featured" value="1">
+                                            <label class="form-check-label fw-medium" for="featured">Featured
+                                                Package</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" name="fixed_departure"
+                                                id="fixed_departure" value="1">
+                                            <label class="form-check-label fw-medium" for="fixed_departure">Fixed
+                                                Departure</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Short Description</label>
+                            <textarea name="short_description" id="short_description" class="form-control" rows="3"
+                                placeholder="Brief description of the package"></textarea>
+                        </div>
+
+                        <div class="editor-container mb-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <textarea id="editor" name="content" class="form-control"
+                                            style="min-height: 300px;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="gallery-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="mb-0">Gallery</h5>
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                id="gallery-image-button">
+                                                Add
+                                            </button>
+                                        </div>
+
+                                        <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                                            <% if (images && images.length> 0) { %>
+                                                <div class="row g-3">
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                                            <div class="card h-100 mt-4 shadow-sm">
+                                                                <div class="card-img-top d-flex justify-content-center align-items-center p-2"
+                                                                    style="height: 150px;">
+                                                                    <img src="<%= image %>" alt="Uploaded Image"
+                                                                        class="img-fluid rounded cursor-pointer"
+                                                                        style="max-height: 100%; width: auto;"
+                                                                        onclick="insertToEditor('<%= image %>')" />
+                                                                </div>
+                                                                <div class="card-body p-2">
+                                                                    <div
+                                                                        class="d-flex justify-content-between align-items-center">
+                                                                        <small class="text-muted text-truncate me-2"
+                                                                            style="max-width: 70%;">
+                                                                            Image <%= index + 1 %>
+                                                                        </small>
+                                                                        <button
+                                                                            class="btn btn-sm btn-outline-secondary copy-url-btn"
+                                                                            data-url="<%= image %>" title="Copy URL">
+                                                                            <i class="bi bi-clipboard"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <% }) %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-center py-3">
+                                                        <p class="text-muted">No previously uploaded images.</p>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SEO Section -->
+                        <div class="accordion mb-4" id="seoAccordion">
+                            <div class="accordion-item border-0 shadow-sm">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button bg-light py-2 collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#seoCollapse">
+
+                                        <span class="fw-medium">SEO Settings</span>
+                                    </button>
+                                </h2>
+                                <div id="seoCollapse" class="accordion-collapse collapse"
+                                    data-bs-parent="#seoAccordion">
+                                    <div class="accordion-body pt-3">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-medium">Meta Title</label>
+                                                    <input name="meta_title" id="meta_title" class="form-control"
+                                                        placeholder="Optimized title (50-60 chars)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label fw-medium">Canonical Url</label>
+                                                    <input type="url" name="canonical_url" id="canonical_url"
+                                                        class="form-control" placeholder="Canonical URL" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-0">
+                                                    <label class="form-label fw-medium">Meta Description</label>
+                                                    <textarea name="meta_description" id="meta_description"
+                                                        class="form-control" rows="2"
+                                                        placeholder="Brief summary (150-160 chars)"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between border-top pt-4">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                Reset
+                            </button>
+                            <div>
+                                <a href="/admin/package/package" class="btn btn-outline-danger me-2">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Save Package
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Styling -->
+        <style>
+            .card-header {
+                border-bottom: none;
+            }
+
+            .form-control:focus,
+            .form-select:focus {
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+            }
+
+            #additional-images-preview img {
+                max-width: 100px;
+                max-height: 80px;
+                object-fit: cover;
+                border-radius: 4px;
+            }
+        </style>
+
+        <script>
+            function previewImage(event) {
+                const preview = document.getElementById('image-preview');
+                const placeholder = document.getElementById('image-placeholder');
+                const file = event.target.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                        placeholder.classList.add('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+                }
+            }
+
+            function previewAdditionalImages(event) {
+                const previewContainer = document.getElementById('additional-images-preview');
+                const files = event.target.files;
+
+                previewContainer.innerHTML = '';
+
+                if (files.length > 0) {
+                    for (let i = 0; i < files.length; i++) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'img-thumbnail';
+                            previewContainer.appendChild(img);
+                        }
+                        reader.readAsDataURL(files[i]);
+                    }
+                } else {
+                    previewContainer.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center w-100 text-muted" style="min-height: 80px;">
+                    
+                    <span>Additional images preview</span>
+                </div>
+            `;
+                }
+            }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const themeInput = document.getElementById('themeInput');
+                const themeDatalistOptions = document.getElementById('themeDatalistOptions');
+                const selectedThemesContainer = document.getElementById('selectedThemesContainer');
+                const selectedThemesInput = document.getElementById('selectedThemesInput');
+                let selectedThemes = []; // Array to hold selected theme objects {id, name}
+
+                function renderSelectedThemes() {
+                    selectedThemesContainer.innerHTML = ''; // Clear previous themes
+
+                    selectedThemes.forEach(theme => {
+                        const themeBadge = document.createElement('span');
+                        themeBadge.className = 'badge bg-primary rounded-pill me-2 mb-1 d-inline-flex align-items-center py-2 ps-3 pe-2';
+                        themeBadge.innerHTML = `
+            ${theme.name}
+            <button type="button" class="btn-close btn-close-white ms-2" aria-label="Close" data-id="${theme.id}"></button>
+        `;
+                        selectedThemesContainer.appendChild(themeBadge);
+                    });
+
+                    selectedThemesInput.value = JSON.stringify(selectedThemes);
+
+                    updateDatalistOptions();
+                }
+
+                function updateDatalistOptions() {
+                    const allThemes = Array.from(themeDatalistOptions.options).map(opt => ({
+                        id: opt.dataset.id,
+                        name: opt.value
+                    }));
+
+                    themeDatalistOptions.innerHTML = ''; // Clear existing options
+
+                    allThemes.forEach(theme => {
+                        if (!selectedThemes.some(sTheme => sTheme.id === theme.id)) {
+                            const option = document.createElement('option');
+                            option.value = theme.name;
+                            option.dataset.id = theme.id;
+                            themeDatalistOptions.appendChild(option);
+                        }
+                    });
+                }
+
+                // Event listener for input change (when a datalist option is selected or user types)
+                themeInput.addEventListener('change', function () {
+                    const selectedValue = this.value;
+                    if (!selectedValue) return; // Ignore empty input
+
+                    // Find the corresponding theme object from the datalist
+                    const selectedOption = Array.from(themeDatalistOptions.options).find(
+                        option => option.value === selectedValue
+                    );
+
+                    if (selectedOption) {
+                        const themeId = selectedOption.dataset.id;
+                        const themeName = selectedOption.value;
+
+                        // Add to selectedThemes if not already present
+                        if (!selectedThemes.some(theme => theme.id === themeId)) {
+                            selectedThemes.push({
+                                id: themeId,
+                                name: themeName
+                            });
+                        }
+                        renderSelectedThemes();
+                        this.value = ''; // Clear the input field after selection
+                    } else {
+                        this.value = '';
+                    }
+                });
+
+                selectedThemesContainer.addEventListener('click', function (event) {
+                    if (event.target.classList.contains('btn-close')) {
+                        const idToRemove = event.target.dataset.id;
+                        selectedThemes = selectedThemes.filter(theme => theme.id !== idToRemove);
+                        renderSelectedThemes();
+                    }
+                });
+
+                renderSelectedThemes();
+            });
+        </script>
+
+        <!-- <script>
+            tinymce.init({
+                selector: '#editor',
+                height: 500,
+                plugins: 'image link code lists table',
+                toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | link | table | code',
+                menubar: false,
+                setup: function (editor) {
+
+                    window.insertToEditor = function (imageUrl) {
+                        editor.insertContent(`<img style="max-width: 300px;" src="${imageUrl}" />`);
+                    };
+
+                    // Handle custom image upload from the button
+                    document.getElementById('gallery-image-button').addEventListener('click', () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.click();
+
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            const formData = new FormData();
+                            formData.append('image', file);
+
+                            try {
+                                const res = await fetch('/upload/package/content', {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+
+                                if (!res.ok) throw new Error('Upload failed');
+
+                                const data = await res.json();
+                                const url = data.file;
+
+                                // Insert into editor
+                                editor.insertContent(`<img style="max-width: 300px;" src="${url}" />`);
+
+                                // Add to gallery
+                                const row = document.querySelector('.gallery-section .row.g-2');
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-6 col-md-4';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image';
+                                img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            } catch (err) {
+                                console.error('Image upload failed', err);
+                            }
+                        };
+                    });
+                }
+            });
+        </script> -->
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btns = [
+                    "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+                    "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+                    "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+                    "undo", "redo", "print", "selectall", "code"
+                ];
+
+                const editor = Jodit.make('#editor', {
+                    height: 500,
+                    buttons: btns,
+                    toolbarAdaptive: false,
+                    defaultActionOnPaste: "insert_clear_html"
+                });
+
+                // Add 'img-fluid' class to inserted <img> tags on content change
+                editor.events.on('change', function (text) {
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(text, 'text/html');
+                    const imgs = htmlDoc.getElementsByTagName('img');
+                    if (imgs) {
+                        for (const img of imgs) {
+                            if (!img.classList.contains('img-fluid')) {
+                                img.classList.add('img-fluid');
+                            }
+                        }
+                    }
+                    text = htmlDoc.body.innerHTML;
+                });
+
+                // Override insertHTML to sanitize HTML using DOMPurify
+                editor.selection.originalInsertHTML = editor.selection.insertHTML;
+                editor.selection.insertHTML = html => {
+                    var clean = DOMPurify.sanitize(html, {
+                        ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+                        ALLOWED_TAGS: [
+                            'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                            'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                            'iframe', 'b', 'a'
+                        ]
+                    });
+                    return editor.selection.originalInsertHTML(clean);
+                };
+
+                // Define insertToEditor globally
+                window.insertToEditor = function (imageUrl) {
+                    editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${imageUrl}" />`);
+                };
+
+                // Upload image manually from 'Add' button
+                document.getElementById('gallery-image-button').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        try {
+                            const res = await fetch('/upload/region/content', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            if (!res.ok) throw new Error('Upload failed');
+
+                            const data = await res.json();
+                            const url = data.file;
+
+                            // Insert into editor
+                            editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${url}" />`);
+
+                            // Add to gallery (if gallery row exists)
+                            const row = document.querySelector('.gallery-section .row.g-3');
+                            if (row) {
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image border border-secondary';
+                                img.style.cssText = 'max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            }
+                        } catch (err) {
+                            console.error('Image upload failed', err);
+                        }
+                    };
+                });
+            });
+        </script>
+
+
+        <script>
+            document.getElementById('title').addEventListener('input', function () {
+                const slug = this.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '');
+                document.getElementById('slug').value = slug;
+            });
+        </script>
+
+        <%- include('../layout/footer') %>

@@ -10,14 +10,14 @@
                             <li class="breadcrumb-item">
                                 <a href="<%= crumb.url %>" class="text-decoration-none text-primary">
                                     <% if (index===0) { %>
-                                        <i class="fas fa-home me-1"></i>
+
                                         <% } %>
                                             <%= crumb.label %>
                                 </a>
                             </li>
                             <% } else { %>
                                 <li class="breadcrumb-item active" aria-current="page">
-                                    <i class="fas fa-palette me-1"></i>
+
                                     <%= crumb.label %>
                                 </li>
                                 <% } %>
@@ -29,13 +29,13 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-palette me-2 text-primary"></i>
+
                         <h5 class="mb-0 fw-semibold">Add New Theme</h5>
                     </div>
                 </div>
 
                 <div class="card-body p-4">
-                    <form action="/admin/theme/add?module=theme&moduleId=theme" method="POST"
+                    <form id="themeForm" action="/admin/theme/add?module=theme&moduleId=theme" method="POST"
                         enctype="multipart/form-data">
                         <div class="row g-4">
                             <!-- Left Column -->
@@ -45,8 +45,7 @@
                                     <label class="form-label fw-medium">Theme Name <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-white"><i
-                                                class="fas fa-tag text-muted"></i></span>
+
                                         <input name="name" id="name" class="form-control" maxlength="255" required
                                             placeholder="Enter theme name" />
                                     </div>
@@ -79,7 +78,7 @@
                                                 class="img-fluid rounded d-none" style="max-height: 120px;">
                                             <div id="image-placeholder"
                                                 class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
-                                                <i class="fas fa-image fa-2x mb-2"></i>
+
                                                 <span>Image preview</span>
                                             </div>
                                         </div>
@@ -91,41 +90,57 @@
                             </div>
                         </div>
 
-                        <!-- Content Editor -->
-                        <div class="editor-container mb-3 ">
+                        
+                        <div class="editor-container mb-3">
                             <div class="row">
-                                <div class="col-lg-8">
-                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
+                                <div class="col-12">
+                                    <div class="mb-3">
                                         <label class="form-label fw-bold">Content</label>
-                                        <!-- <div id="editor" class="border rounded"
-                                            style="min-height: 300px; max-height: 300px; overflow-y: auto; height: auto;">
-                                        </div> -->
-                                        <textarea id="editor" name="content"></textarea>
-
+                                        <textarea id="editor" name="content" class="form-control"
+                                            style="min-height: 300px;"></textarea>
                                     </div>
                                 </div>
+                            </div>
 
-
-                                <div class="col-lg-4">
-                                    <div class="gallery-section"
-                                        style="border-left: 1px solid #ccc; padding-left: 10px;">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="gallery-section">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0">Previously Uploaded Images</h5>
+                                            <h5 class="mb-0">Gallery</h5>
                                             <button type="button" class="btn btn-primary btn-sm"
                                                 id="gallery-image-button">
-                                                <i class="fas fa-plus"></i> Add Image
+                                                Add
                                             </button>
                                         </div>
 
-                                        <div style="max-height: 350px; overflow-y: auto;">
+                                        <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
                                             <% if (images && images.length> 0) { %>
-                                                <div class="row g-2">
+                                                <div class="row g-3">
                                                     <% images.reverse().forEach((image, index)=> { %>
-                                                        <div class="col-6 col-md-4">
-                                                            <img src="<%= image %>" alt="Uploaded Image"
-                                                                class="img-fluid rounded selectable-image"
-                                                                style="height: 120px; width: 100%; object-fit: cover; cursor: pointer;"
-                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                                            <div class="card h-100 mt-4 shadow-sm">
+                                                                <div class="card-img-top d-flex justify-content-center align-items-center p-2"
+                                                                    style="height: 150px;">
+                                                                    <img src="<%= image %>" alt="Uploaded Image"
+                                                                        class="img-fluid rounded cursor-pointer"
+                                                                        style="max-height: 100%; width: auto;"
+                                                                        onclick="insertToEditor('<%= image %>')" />
+                                                                </div>
+                                                                <div class="card-body p-2">
+                                                                    <div
+                                                                        class="d-flex justify-content-between align-items-center">
+                                                                        <small class="text-muted text-truncate me-2"
+                                                                            style="max-width: 70%;">
+                                                                            Image <%= index + 1 %>
+                                                                        </small>
+                                                                        <button
+                                                                            class="btn btn-sm btn-outline-secondary copy-url-btn"
+                                                                            data-url="<%= image %>" title="Copy URL">
+                                                                            <i class="bi bi-clipboard"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <% }) %>
                                                 </div>
@@ -139,14 +154,13 @@
                                 </div>
                             </div>
                         </div>
-
                         <!-- SEO Section -->
                         <div class="accordion mb-4" id="seoAccordion">
                             <div class="accordion-item border-0 shadow-sm">
                                 <h2 class="accordion-header">
                                     <button class="accordion-button bg-light py-2 collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#seoCollapse">
-                                        <i class="fas fa-search me-2 text-primary"></i>
+
                                         <span class="fw-medium">SEO Settings</span>
                                     </button>
                                 </h2>
@@ -163,9 +177,9 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-medium">Meta Keywords</label>
-                                                    <input name="meta_keywords" class="form-control"
-                                                        placeholder="Comma-separated keywords" />
+                                                    <label class="form-label fw-medium">Canonical Url</label>
+                                                    <input type="url" name="canonical_url" class="form-control"
+                                                        placeholder="Canonical URL" />
                                                 </div>
                                             </div>
                                             <div class="col-12">
@@ -180,18 +194,19 @@
                                 </div>
                             </div>
                         </div>
-
+                        <!-- Error container -->
+                        <div id="formError" class="alert alert-danger d-none mt-3"></div>
                         <!-- Submit Buttons -->
                         <div class="d-flex justify-content-between border-top pt-4">
                             <button type="reset" class="btn btn-outline-secondary">
-                                <i class="fas fa-undo me-1"></i> Reset
+                                Reset
                             </button>
                             <div>
                                 <a href="/admin/theme/theme" class="btn btn-outline-danger me-2">
-                                    <i class="fas fa-times me-1"></i> Cancel
+                                    Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> Save Theme
+                                    Save Theme
                                 </button>
                             </div>
                         </div>
@@ -237,10 +252,10 @@
             }
         </script>
 
-        <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
-            referrerpolicy="origin"></script>
+        <!-- <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
+            referrerpolicy="origin"></script> -->
 
-        <script>
+        <!-- <script>
             tinymce.init({
                 selector: '#editor',
                 height: 500,
@@ -305,7 +320,108 @@
                     });
                 }
             });
+        </script> -->
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btns = [
+                    "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+                    "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+                    "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+                    "undo", "redo", "print", "selectall", "code"
+                ];
+
+                const editor = Jodit.make('#editor', {
+                    height: 500,
+                    buttons: btns,
+                    toolbarAdaptive: false,
+                    defaultActionOnPaste: "insert_clear_html"
+                });
+
+                // Add 'img-fluid' class to inserted <img> tags on content change
+                editor.events.on('change', function (text) {
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(text, 'text/html');
+                    const imgs = htmlDoc.getElementsByTagName('img');
+                    if (imgs) {
+                        for (const img of imgs) {
+                            if (!img.classList.contains('img-fluid')) {
+                                img.classList.add('img-fluid');
+                            }
+                        }
+                    }
+                    text = htmlDoc.body.innerHTML;
+                });
+
+                // Override insertHTML to sanitize HTML using DOMPurify
+                editor.selection.originalInsertHTML = editor.selection.insertHTML;
+                editor.selection.insertHTML = html => {
+                    var clean = DOMPurify.sanitize(html, {
+                        ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+                        ALLOWED_TAGS: [
+                            'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                            'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                            'iframe', 'b', 'a'
+                        ]
+                    });
+                    return editor.selection.originalInsertHTML(clean);
+                };
+
+                // Define insertToEditor globally
+                window.insertToEditor = function (imageUrl) {
+                    editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${imageUrl}" />`);
+                };
+
+                // Upload image manually from 'Add' button
+                document.getElementById('gallery-image-button').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        try {
+                            const res = await fetch('/upload/region/content', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            if (!res.ok) throw new Error('Upload failed');
+
+                            const data = await res.json();
+                            const url = data.file;
+
+                            // Insert into editor
+                            editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${url}" />`);
+
+                            // Add to gallery (if gallery row exists)
+                            const row = document.querySelector('.gallery-section .row.g-3');
+                            if (row) {
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image border border-secondary';
+                                img.style.cssText = 'max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            }
+                        } catch (err) {
+                            console.error('Image upload failed', err);
+                        }
+                    };
+                });
+            });
         </script>
+
         <script>
             document.getElementById('name').addEventListener('input', function () {
                 const slug = this.value
@@ -314,5 +430,67 @@
                     .replace(/(^-|-$)/g, '');
                 document.getElementById('slug').value = slug;
             });
+        </script>
+        <script>
+            document.getElementById('themeForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Show loading state
+                const submitBtn = document.querySelector('#themeForm button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Saving...';
+                submitBtn.disabled = true;
+
+                // Clear previous errors
+                const errorContainer = document.getElementById('formError');
+                errorContainer.classList.add('d-none');
+                errorContainer.innerHTML = '';
+
+                try {
+                    const formData = new FormData(this);
+
+                    // Get TinyMCE content and add to formData
+                    if (typeof tinymce !== 'undefined') {
+                        formData.set('content', tinymce.get('editor').getContent());
+                    }
+
+                    const response = await fetch(this.action, {
+                        method: 'POST',
+                        body: formData,
+                        // Don't set Content-Type header when using FormData,
+                        // the browser will set it automatically with the correct boundary
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Server error occurred');
+                    }
+
+                    if (result.success) {
+                        // Success - redirect or show success message
+                        window.location.href = '/admin/theme/theme?success=Theme created successfully';
+                    } else {
+                        // Show validation errors
+                        showFormError(result.message || 'Error saving theme');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showFormError(error.message || 'An unexpected error occurred');
+                } finally {
+                    // Restore button state
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            function showFormError(message) {
+                const errorContainer = document.getElementById('formError');
+                errorContainer.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${message}`;
+                errorContainer.classList.remove('d-none');
+
+                // Scroll to error
+                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         </script>
         <%- include('../layout/footer') %>

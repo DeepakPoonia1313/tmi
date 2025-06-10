@@ -155,7 +155,7 @@
 
             <div class="card shadow-sm border-0">
                 <div class="card-header text-black">
-                    <h4 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i> Edit Region</h4>
+                    <h4 class="mb-0"> Edit Region</h4>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="/admin/region/update" enctype="multipart/form-data">
@@ -165,7 +165,7 @@
 
                         <!-- Basic Information Section -->
                         <div class="form-section">
-                            <h5><i class="fas fa-info-circle me-2"></i> Basic Information</h5>
+                            <h5> Basic Information</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="name" class="form-label">Region Name *</label>
@@ -187,7 +187,7 @@
 
                         <!-- SEO Section -->
                         <div class="form-section">
-                            <h5><i class="fas fa-search me-2"></i> SEO Settings</h5>
+                            <h5> SEO Settings</h5>
                             <div class="mb-3">
                                 <label for="meta_title" class="form-label">Meta Title</label>
                                 <input type="text" class="form-control" id="meta_title" name="meta_title"
@@ -201,18 +201,18 @@
                                 <small class="text-muted">Recommended: 150-160 characters</small>
                             </div>
                             <div class="mb-3">
-                                <label for="meta_keywords" class="form-label">Meta Keywords</label>
-                                <!-- <textarea class="form-control" id="meta_keywords" name="meta_keywords"
-                                    rows="2"><%= region.meta_keywords %></textarea> -->
-                                <input type="text" class="form-control" id="meta_keywords" name="meta_keywords"
-                                    value="<%= region.meta_keywords %>">
+                                <label for="canonical_url" class="form-label">Canonical Url</label>
+                                <!-- <textarea class="form-control" id="canonical_url" name="canonical_url"
+                                    rows="2"><%= region.canonical_url %></textarea> -->
+                                <input type="url" class="form-control" id="canonical_url" name="canonical_url"
+                                    value="<%= region.canonical_url %>">
                                 <small class="text-muted">Recommended: 150-160 characters</small>
                             </div>
                         </div>
 
                         <!-- Image Section -->
                         <div class="mb-3">
-                            <label class="form-label"><i class="fas fa-image me-2"></i> Region Image</label><br>
+                            <label class="form-label"> Region Image</label><br>
 
                             <% if (region.image) { %>
                                 <div id="image-preview-wrapper" style="display: flex; align-items: center; gap: 10px;">
@@ -253,78 +253,56 @@
                         </div>
 
 
-
-                        <!-- <div class="editor-container mb-3 ">
+                        <div class="editor-container mb-3">
                             <div class="row">
-                                <div class="col-lg-8">
-                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
-                                        <label class="form-label fw-bold">Detailed Content</label>
-                                        <div id="editor" class="border rounded"
-                                            style="min-height: 300px; max-height: 400px; overflow-y: auto; height: auto;">
-                                        </div>
-                                        <input type="hidden" name="content" id="content">
-                                    </div>
-                                </div>
-
-
-                                <div class="col-lg-4">
-                                    <div class="gallery-section"
-                                        style="border-left: 1px solid #ccc; padding-left: 10px; max-height: 400px; overflow-y: auto;">
-                                        <h5>Previously Uploaded Images</h5>
-                                        <div class="container">
-                                            <div class="row g-2">
-                                                <% if (images && images.length> 0) { %>
-                                                    <% images.reverse().forEach((image, index)=> { %>
-                                                        <div class="col-6 col-md-4">
-                                                            <img src="<%= image %>" alt="Uploaded Image"
-                                                                class="img-fluid rounded selectable-image"
-                                                                style="height: 120px; object-fit: cover; cursor: pointer;"
-                                                                onclick="insertToEditor('<%= image %>')" />
-                                                        </div>
-                                                        <% }) %>
-                                                            <% } else { %>
-                                                                <p>No previously uploaded images.</p>
-                                                                <% } %>
-                                            </div>
-                                        </div>
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <textarea id="editor" name="content" class="form-control"
+                                            style="min-height: 300px;"><%- region.content %></textarea>
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
-                        <div class="editor-container mb-3 ">
-                            <div class="row">
-                                <div class="col-lg-8">
-                                    <div class="mb-3" style="flex: 1 1 70%; padding-right: 10px;">
-                                        <label class="form-label fw-bold">Content</label>
-                                        <!-- <div id="editor" class="border rounded"
-                                            style="min-height: 300px; max-height: 300px; overflow-y: auto; height: auto;">
-                                        </div> -->
-                                        <textarea id="editor" name="content"><%- region.content %></textarea>
 
-                                    </div>
-                                </div>
-
-
-                                <div class="col-lg-4">
-                                    <div class="gallery-section"
-                                        style="border-left: 1px solid #ccc; padding-left: 10px;">
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="gallery-section">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h5 class="mb-0">Previously Uploaded Images</h5>
+                                            <h5 class="mb-0">Gallery</h5>
                                             <button type="button" class="btn btn-primary btn-sm"
                                                 id="gallery-image-button">
-                                                <i class="fas fa-plus"></i> Add Image
+                                                Add
                                             </button>
                                         </div>
 
-                                        <div style="max-height: 350px; overflow-y: auto;">
+                                        <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
                                             <% if (images && images.length> 0) { %>
-                                                <div class="row g-2">
+                                                <div class="row g-3">
                                                     <% images.reverse().forEach((image, index)=> { %>
-                                                        <div class="col-6 col-md-4">
-                                                            <img src="<%= image %>" alt="Uploaded Image"
-                                                                class="img-fluid rounded selectable-image"
-                                                                style="height: 120px; width: 100%; object-fit: cover; cursor: pointer;"
-                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                                            <div class="card h-100 mt-4 shadow-sm">
+                                                                <div class="card-img-top d-flex justify-content-center align-items-center p-2"
+                                                                    style="height: 150px;">
+                                                                    <img src="<%= image %>" alt="Uploaded Image"
+                                                                        class="img-fluid rounded cursor-pointer"
+                                                                        style="max-height: 100%; width: auto;"
+                                                                        onclick="insertToEditor('<%= image %>')" />
+                                                                </div>
+                                                                <div class="card-body p-2">
+                                                                    <div
+                                                                        class="d-flex justify-content-between align-items-center">
+                                                                        <small class="text-muted text-truncate me-2"
+                                                                            style="max-width: 70%;">
+                                                                            Image <%= index + 1 %>
+                                                                        </small>
+                                                                        <button
+                                                                            class="btn btn-sm btn-outline-secondary copy-url-btn"
+                                                                            data-url="<%= image %>" title="Copy URL">
+                                                                            <i class="bi bi-clipboard"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <% }) %>
                                                 </div>
@@ -334,18 +312,34 @@
                                                     </div>
                                                     <% } %>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
+
+
                         </div>
 
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <!-- Select2 Multi-select -->
+                                <label for="featuredPackages">Featured Packages</label>
+                                <select id="featuredPackages" class="form-control" multiple></select>
+
+                                <!-- Container to show selected packages -->
+                                <div id="selectedPackagesContainer" class="mt-3 d-flex flex-column gap-2"></div>
+
+                                <!-- Hidden input to store selected data for form submission -->
+                                <input type="hidden" name="featured_packages" id="featuredPackagesInput">
+                            </div>
+                        </div>
                         <!-- Form Actions -->
                         <div class="d-flex justify-content-between mt-4">
                             <a href="/admin/region/region" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-1"></i> Cancel
+                                Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i> Save Changes
+                                Save Changes
                             </button>
                         </div>
                     </form>
@@ -371,10 +365,126 @@
             });
         </script>
 
-        <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
-            referrerpolicy="origin"></script>
+        <!-- <script src="https://cdn.tiny.cloud/1/0uj5zh0otswll1xng9imrwqwy3mf8jzwzxyc3ckzu5m0y5we/tinymce/7/tinymce.min.js"
+            referrerpolicy="origin"></script> -->
 
         <script>
+            let selectedPackages = [];
+
+  <% if (selectedFeaturedPackages && selectedFeaturedPackages.length > 0) { %>
+                selectedPackages = <%- selectedFeaturedPackages %>;
+                selectedPackages.sort((a, b) => a.order_number - b.order_number);
+  <% } %>
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    renderSelectedPackages();
+                });
+
+            // Initialize Select2 with AJAX search
+            $('#featuredPackages').select2({
+                placeholder: 'Search and select packages',
+                ajax: {
+                    url: '/admin/api/packages',
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({ q: params.term }),
+                    processResults: data => ({
+                        results: data.results
+                    }),
+                    cache: true
+                },
+                minimumInputLength: 2,
+                width: '100%',
+                allowClear: true,
+                escapeMarkup: (markup) => markup, // Allow HTML in results
+                templateResult: (pkg) => {
+                    if (!pkg.id) return pkg.text; // Return placeholder text
+                    return `<div class="d-flex align-items-center">
+                        <img src="${pkg.img}" alt="${pkg.text}" style="max-width: 50px; max-height: 50px; object-fit: cover;" class="img-thumbnail me-2">
+                        <span>${pkg.text}</span>
+                    </div>`;
+                },
+                templateSelection: (pkg) => {
+                    if (!pkg.id) return pkg.text; // Return placeholder text
+                    return `<div class="d-flex align-items-center">
+                        <img src="${pkg.img}" alt="${pkg.text}" style="max-width: 50px; max-height: 50px; object-fit: cover;" class="img-thumbnail me-2">
+                        <span>${pkg.text}</span>
+                    </div>`;
+                },
+                language: {
+                    noResults: () => 'No packages found',
+                    searching: () => 'Searching...'
+                },
+                language: 'en',
+
+            });
+
+            // Handle selection
+            $('#featuredPackages').on('select2:select', function (e) {
+                const pkg = e.params.data;
+
+                // Avoid duplicates
+                if (!selectedPackages.find(p => p.id === pkg.id)) {
+                    selectedPackages.push({ ...pkg, order_number: selectedPackages.length + 1 });
+                    renderSelectedPackages();
+                }
+
+                // Clear selection from select2 (we manage display manually)
+                $(this).val(null).trigger('change');
+            });
+
+            // Render selected packages
+            function renderSelectedPackages() {
+                const container = document.getElementById('selectedPackagesContainer');
+                container.innerHTML = '';
+
+                selectedPackages.forEach((pkg, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'd-flex align-items-center justify-content-between p-2 border rounded bg-light';
+
+                    div.innerHTML = `
+        <div>
+          <strong>${pkg.text}</strong> (Order: ${index + 1})
+          <br>
+          <img src="${pkg.img}" alt="${pkg.text}" style="max-width: 50px; max-height: 50px; object-fit: cover;" class="img-thumbnail mt-1">
+        </div>
+        <div>
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="movePackage(${index}, -1)">↑</button>
+          <button class="btn btn-sm btn-outline-secondary me-2" onclick="movePackage(${index}, 1)">↓</button>
+          <button class="btn btn-sm btn-danger" onclick="removePackage(${index})">Remove</button>
+        </div>
+      `;
+
+                    container.appendChild(div);
+                });
+
+                // Update hidden input
+                document.getElementById('featuredPackagesInput').value = JSON.stringify(
+                    selectedPackages.map((pkg, index) => ({
+                        package_id: pkg.id,
+                        order_number: index + 1
+                    }))
+                );
+            }
+
+            function removePackage(index) {
+                selectedPackages.splice(index, 1);
+                renderSelectedPackages();
+            }
+
+            function movePackage(index, direction) {
+                const newIndex = index + direction;
+                if (newIndex < 0 || newIndex >= selectedPackages.length) return;
+
+                const temp = selectedPackages[index];
+                selectedPackages[index] = selectedPackages[newIndex];
+                selectedPackages[newIndex] = temp;
+
+                renderSelectedPackages();
+            }
+        </script>
+
+        <!-- <script>
             tinymce.init({
                 selector: '#editor',
                 height: 500,
@@ -439,7 +549,108 @@
                     });
                 }
             });
+        </script> -->
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const btns = [
+                    "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+                    "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+                    "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+                    "undo", "redo", "print", "selectall", "code"
+                ];
+
+                const editor = Jodit.make('#editor', {
+                    height: 500,
+                    buttons: btns,
+                    toolbarAdaptive: false,
+                    defaultActionOnPaste: "insert_clear_html"
+                });
+
+                // Add 'img-fluid' class to inserted <img> tags on content change
+                editor.events.on('change', function (text) {
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(text, 'text/html');
+                    const imgs = htmlDoc.getElementsByTagName('img');
+                    if (imgs) {
+                        for (const img of imgs) {
+                            if (!img.classList.contains('img-fluid')) {
+                                img.classList.add('img-fluid');
+                            }
+                        }
+                    }
+                    text = htmlDoc.body.innerHTML;
+                });
+
+                // Override insertHTML to sanitize HTML using DOMPurify
+                editor.selection.originalInsertHTML = editor.selection.insertHTML;
+                editor.selection.insertHTML = html => {
+                    var clean = DOMPurify.sanitize(html, {
+                        ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+                        ALLOWED_TAGS: [
+                            'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                            'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                            'iframe', 'b', 'a'
+                        ]
+                    });
+                    return editor.selection.originalInsertHTML(clean);
+                };
+
+                // Define insertToEditor globally
+                window.insertToEditor = function (imageUrl) {
+                    editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${imageUrl}" />`);
+                };
+
+                // Upload image manually from 'Add' button
+                document.getElementById('gallery-image-button').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        try {
+                            const res = await fetch('/upload/region/content', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            if (!res.ok) throw new Error('Upload failed');
+
+                            const data = await res.json();
+                            const url = data.file;
+
+                            // Insert into editor
+                            editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${url}" />`);
+
+                            // Add to gallery (if gallery row exists)
+                            const row = document.querySelector('.gallery-section .row.g-3');
+                            if (row) {
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image border border-secondary';
+                                img.style.cssText = 'max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            }
+                        } catch (err) {
+                            console.error('Image upload failed', err);
+                        }
+                    };
+                });
+            });
         </script>
+
         <script>
             document.getElementById('name').addEventListener('input', function () {
                 const slug = this.value

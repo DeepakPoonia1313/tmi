@@ -1,0 +1,233 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="app-main bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">Itinerary Management</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">All Packages with Itineraries</h3>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form method="get" action="/admin/itinerary/itinerary" class="d-flex"
+                                            id="searchForm">
+                                            <input type="text" name="search" class="form-control form-control-sm me-2"
+                                                placeholder="Search by package title" value="<%= search %>" />
+                                            <button class="btn btn-sm btn-outline-dark" type="submit">Search</button>
+                                        </form>
+                                        <a href="/admin/itinerary/renderAddPage"
+                                            class="btn btn-sm btn-outline-dark ms-2">
+                                            Add New Itinerary
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="card-body table-responsive" id="itinerary-table-container">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="text-dark">Package ID</th>
+                                                <th class="text-dark">Package Title</th>
+                                                <th class="text-dark">Itinerary Count</th>
+                                                <th class="text-dark">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% packages.forEach(pkg=> { %>
+                                                <tr class="bg-white">
+                                                    <td>
+                                                        <%= pkg.package_id %>
+                                                    </td>
+                                                    <td><strong>
+                                                            <%= pkg.package_title %>
+                                                        </strong></td>
+                                                    <td>
+                                                        <%= pkg.itinerary_count %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button
+                                                                class="btn btn-sm btn-outline-dark d-flex justify-content-center align-items-center"
+                                                                style="width: 40px; height: 40px;"
+                                                                data-bs-toggle="dropdown">
+                                                                ...
+                                                            </button>
+
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/itinerary/packageItineraries/<%= pkg.package_id %>">
+                                                                        View Itineraries
+                                                                    </a></li>
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/itinerary/renderEditPage/<%= pkg.package_id %>">
+                                                                        Edit Itinerary
+                                                                    </a></li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider" />
+                                                                </li>
+                                                                <li><a class="dropdown-item text-danger"
+                                                                        href="/admin/itinerary/deletePackageItineraries/<%= pkg.package_id %>"
+                                                                        onclick="return confirm('Are you sure you want to delete all itineraries for this package?');">
+                                                                        Delete All
+                                                                    </a></li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Pagination Footer -->
+                                    <% if (totalPages> 1) { %>
+                                        <div class="card-footer bg-light">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="text-gray">
+                                                    Showing <%= packages.length %> of <%= total %> entries
+                                                </div>
+                                                <ul class="pagination pagination-sm mb-0">
+                                                    <% for (let i=1; i <=totalPages; i++) { %>
+                                                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                            <a class="page-link" href="#"
+                                                                onclick="fetchItineraries(<%= i %>, '<%= search %>')">
+                                                                <%= i %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <% } %>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <%- include('../layout/footer') %>
+
+            <script>
+                // Fetch and update itinerary list
+                function fetchItineraries(page = 1, search = '') {
+                    const params = new URLSearchParams({
+                        page,
+                        search,
+                        ajax: true
+                    });
+
+                    fetch(`/admin/itinerary/itinerary?${params.toString()}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                        .then(res => {
+                            if (!res.ok) throw new Error('Network response was not ok');
+                            return res.json();
+                        })
+                        .then(data => {
+                            renderTable(data.packages);
+                            renderPagination(data.totalPages, data.currentPage, data.search);
+                            updateShowingText(data.packages.length, data.total);
+                        })
+                        .catch(err => {
+                            console.error('Error:', err);
+                            alert('Error loading data. Please try again.');
+                        });
+                }
+
+                // Render table body rows dynamically
+                function renderTable(packages) {
+                    const tbody = packages.map(pkg => `
+                        <tr class="bg-white">
+                            <td>${pkg.package_id}</td>
+                            <td><strong>${pkg.package_title}</strong></td>
+                            <td>${pkg.itinerary_count}</td>
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-dark dropdown-toggle" 
+                                        data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        <li><a class="dropdown-item text-gray" 
+                                            href="/admin/itinerary/packageItineraries/${pkg.package_id}">
+                                            View Itineraries
+                                        </a></li>
+                                        <li><a class="dropdown-item text-gray" 
+                                            href="/admin/itinerary/renderAddPage?package_id=${pkg.package_id}">
+                                            Add Itinerary Day
+                                        </a></li>
+                                        <li><hr class="dropdown-divider" /></li>
+                                        <li><a class="dropdown-item text-danger" 
+                                            href="/admin/itinerary/deletePackageItineraries/${pkg.package_id}" 
+                                            onclick="return confirm('Are you sure you want to delete all itineraries for this package?');">
+                                            Delete All
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                    document.querySelector('#itinerary-table-container tbody').innerHTML = tbody;
+                }
+
+                // Render pagination buttons dynamically
+                function renderPagination(totalPages, currentPage, search) {
+                    let paginationHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHTML += `
+                            <li class="page-item ${i === currentPage ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="fetchItineraries(${i}, '${search}')">
+                                    ${i}
+                                </a>
+                            </li>`;
+                    }
+
+                    const paginationContainer = document.querySelector('#itinerary-table-container .pagination');
+                    if (paginationContainer) {
+                        paginationContainer.innerHTML = paginationHTML;
+                    }
+                }
+
+                // Update the "Showing X of Y entries" text dynamically
+                function updateShowingText(currentCount, total) {
+                    const textDiv = document.querySelector('#itinerary-table-container .text-gray');
+                    if (textDiv) {
+                        textDiv.textContent = `Showing ${currentCount} of ${total} entries`;
+                    }
+                }
+
+                // Intercept form submit and fetch via AJAX
+                document.getElementById('searchForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const search = this.search.value.trim();
+                    fetchItineraries(1, search);
+                });
+
+                // Initialize with current page and search term
+                document.addEventListener('DOMContentLoaded', function () {
+                    const initialPage = <%= currentPage %>;
+                    const initialSearch = '<%= search %>';
+
+                    // If coming from a search or paginated link, ensure we're showing the correct data
+                    if (initialPage > 1 || initialSearch) {
+                        fetchItineraries(initialPage, initialSearch);
+                    }
+                });
+            </script>

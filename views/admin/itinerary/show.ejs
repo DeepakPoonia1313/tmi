@@ -1,0 +1,194 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="main-content">
+            <div class="container-fluid py-4">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb bg-white shadow-sm rounded-3 px-3 py-2">
+                        <li class="breadcrumb-item"><a href="/admin/dashboard"
+                                class="text-decoration-none text-primary"><i class="bi bi-house-door me-1"></i>
+                                Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/admin/itinerary/itinerary"
+                                class="text-decoration-none text-primary">Itineraries</a></li>
+                        <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">
+                            <%= itineraries[0].package_title %>
+                        </li>
+                    </ol>
+                </nav>
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h2 class="mb-1 text-dark fw-bold">
+                            <i class="bi bi-journal-bookmark-fill text-primary me-2"></i>
+                            Itinerary Details
+                        </h2>
+                        <p class="text-muted mb-0">Detailed day-by-day itinerary for package:
+                            <a href="/admin/package/renderPackageDetail/<%= package_id %>"
+                                class="text-decoration-none text-primary fw-semibold">
+                                <%= itineraries[0].package_title %>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                <% if (itineraries.length===0) { %>
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-calendar-x text-muted display-5 mb-3"></i>
+                            <h4 class="text-dark mb-3">No Itineraries Found</h4>
+                            <p class="text-muted mb-4">This package doesn't have any itinerary days added yet.</p>
+                            <a href="/admin/itinerary/add/<%= package_id %>" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i> Create First Day
+                            </a>
+                        </div>
+                    </div>
+                    <% } else { %>
+                        <div class="row g-4">
+                            <% itineraries.forEach(itinerary=> { %>
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm rounded-3 overflow-hidden h-100">
+                                        <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h4 class="mb-0 text-dark fw-bold">
+                                                    <i class="bi bi-calendar-day text-primary me-2"></i>
+                                                    Day <%= itinerary.day_number %>
+                                                </h4>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6 col-lg-3">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">From</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <%= itinerary.city_from || 'N/A' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">To</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <%= itinerary.city_to || 'N/A' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">Distance</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <%= itinerary.distance ? itinerary.distance + ' km' : 'N/A'
+                                                                %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">Duration</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <%= itinerary.duration ? itinerary.duration + ' hrs' : 'N/A'
+                                                                %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">Hotel</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <%= itinerary.hotel_name || 'N/A' %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="p-3 bg-light rounded-2">
+                                                        <h6 class="text-muted small mb-1">Theme</h6>
+                                                        <p class="mb-0 fw-semibold">
+                                                            <% if (itinerary.theme_name) { %>
+                                                                <a href="/admin/theme/<%= itinerary.theme_id %>"
+                                                                    class="text-decoration-none text-primary">
+                                                                    <%= itinerary.theme_name %>
+                                                                </a>
+                                                                <% } else { %>
+                                                                    N/A
+                                                                    <% } %>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <h5 class="mb-3 text-dark fw-semibold">
+                                                <i class="bi bi-journal-text text-primary me-2"></i>
+                                                Activities & Details
+                                            </h5>
+
+                                            <% if (itinerary.content && itinerary.content.length> 300) { %>
+                                                <div class="itinerary-content mb-3"
+                                                    style="max-height: 200px; overflow: hidden;">
+                                                    <div class="text-muted" style="white-space: pre-line;">
+                                                        <%- itinerary.content.replace(/\n/g, '<br>' ) %>
+                                                    </div>
+                                                </div>
+                                                <button class="btn btn-link text-primary p-0 mb-3 read-more-btn"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#contentCollapse<%= itinerary.id %>">
+                                                    <i class="bi bi-chevron-down me-1"></i> Show More
+                                                </button>
+                                                <div class="collapse" id="contentCollapse<%= itinerary.id %>">
+                                                    <div class="text-muted" style="white-space: pre-line;">
+                                                        <%- itinerary.content.replace(/\n/g, '<br>' ) %>
+                                                    </div>
+                                                    <button class="btn btn-link text-primary p-0 mt-2 read-less-btn"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#contentCollapse<%= itinerary.id %>">
+                                                        <i class="bi bi-chevron-up me-1"></i> Show Less
+                                                    </button>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-muted" style="white-space: pre-line;">
+                                                        <%- itinerary.content || 'No content available' %>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <% }) %>
+                        </div>
+                        <% } %>
+            </div>
+        </div>
+
+        <style>
+            .itinerary-content {
+                background: linear-gradient(to bottom, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 1) 75%, rgba(255, 255, 255, 0) 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+                mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+            }
+
+            .read-more-btn,
+            .read-less-btn {
+                text-decoration: none;
+                transition: all 0.2s;
+            }
+
+            .read-more-btn:hover,
+            .read-less-btn:hover {
+                text-decoration: underline;
+            }
+
+            .card {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1) !important;
+            }
+        </style>
+
+        <%- include('../layout/footer') %>

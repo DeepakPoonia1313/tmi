@@ -1,6 +1,297 @@
 <%- include('../layout/header') %>
-<%- include('../layout/sidebar') %>
+    <%- include('../layout/sidebar') %>
 
-<h1>This is the state add page.</h1>
+        <div class="app-main bg-white">
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-dark">Home</a></li>
+                                <li class="breadcrumb-item active text-gray">Package Management</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">All Packages</h3>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form method="get" action="/admin/package/package" class="d-flex" id="searchForm">
+                                            <input type="text" name="search" class="form-control form-control-sm me-2"
+                                                placeholder="Search by title" value="<%= search %>" />
+                                            <button class="btn btn-sm btn-outline-dark" type="submit">Search</button>
+                                        </form>
+                                        <a href="/admin/package/renderAddPage" class="btn btn-sm btn-outline-dark ms-2">
+                                            Add New
+                                        </a>
+                                    </div>
+                                </div>
 
-<%- include('../layout/footer') %>
+                                <div class="card-body table-responsive" id="package-table-container">
+                                    <div id="response-message" class="alert d-none" role="alert"></div>
+                                    <table class="table table-hover align-middle">
+                                        <thead class="bg-gray-100">
+                                            <tr>
+                                                <th class="text-dark">ID</th>
+                                                <th class="text-dark">Package</th>
+                                                <th class="text-dark">Price</th>
+                                                <th class="text-dark">Image</th>
+                                                <th class="text-dark">Featured</th>
+                                                <th class="text-dark">Fixed Departure</th>
+                                                <th class="text-dark">Status</th>
+                                                <th class="text-dark">Updated</th>
+                                                <th class="text-dark">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% packages.forEach(pkg=> { %>
+                                                <tr class="bg-white" data-package-id="<%= pkg.id %>">
+                                                    <td>
+                                                        <%= pkg.id %>
+                                                    </td>
+                                                    <td>
+                                                        <strong>
+                                                            <%= pkg.title %>
+                                                        </strong>
+                                                        <br>
+                                                        <small class="text-muted">
+                                                            <%= pkg.slug %>
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        ₹<%= parseFloat(pkg.price).toFixed(2) %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (pkg.image) { %>
+                                                            <img src="<%= pkg.image %>" class="img-thumbnail"
+                                                                style="max-height: 40px; max-width: 60px;" />
+                                                            <% } else { %>
+                                                                <span class="text-gray">No image</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (pkg.featured) { %>
+                                                            <span class="badge bg-success">Yes</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-secondary">No</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (pkg.fixed_departure) { %>
+                                                            <span class="badge bg-success">Yes</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-secondary">No</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (pkg.status) { %>
+                                                            <span class="badge bg-success">Active</span>
+                                                            <% } else { %>
+                                                                <span class="badge bg-danger">Inactive</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td class="text-gray">
+                                                        <%= new Date(pkg.updated_at).toLocaleDateString() %>
+                                                    </td>
+                                                    <td>
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-outline-dark dropdown-toggle"
+                                                                data-bs-toggle="dropdown">Actions</button>
+                                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/package/renderPackageDetail/<%= pkg.id %>">
+                                                                         View
+                                                                    </a></li>
+                                                                <li><a class="dropdown-item text-gray"
+                                                                        href="/admin/package/renderEditPage/<%= pkg.id %>">
+                                                                         Edit
+                                                                    </a></li>
+                                                                <li>
+                                                                    <hr class="dropdown-divider" />
+                                                                </li>
+                                                                <li>
+                                                                    <a href="#" class="dropdown-item text-danger"
+                                                                        onclick="deletePackage(<%= pkg.id %>)">
+                                                                         Delete
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% }); %>
+                                        </tbody>
+                                    </table>
+
+                                    <!-- Pagination Footer -->
+                                    <div class="card-footer bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <div class="text-gray">
+                                                Showing <%= packages.length %> of <%= total %> entries
+                                            </div>
+                                            <ul class="pagination pagination-sm mb-0">
+                                                <% for (let i=1; i <=totalPages; i++) { %>
+                                                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                                                        <a class="page-link"
+                                                            href="/admin/package/package?page=<%= i %>&search=<%= search %>">
+                                                            <%= i %>
+                                                        </a>
+                                                    </li>
+                                                    <% } %>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div> <!-- end card-body -->
+                            </div> <!-- end card -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <%- include('../layout/footer') %>
+
+            <script>
+                function deletePackage(packageId) {
+                    if (!confirm("Are you sure you want to delete this package?")) return;
+
+                    fetch(`/admin/package/delete/${packageId}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            Toastify({
+                                text: data.message || "Deleted successfully",
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#28a745",
+                            }).showToast();
+
+                            // Remove the row from the DOM without reloading
+                            const row = document.querySelector(`tr[data-package-id="${packageId}"]`);
+                            if (row) row.remove();
+
+                            // Optionally update the "Showing X of Y" text
+                            const currentCountEl = document.querySelector('.card-footer .text-gray');
+                            const currentCount = document.querySelectorAll('#package-table-container tbody tr').length;
+                            const total = parseInt("<%= total %>") - 1;
+                            if (currentCountEl) {
+                                currentCountEl.textContent = `Showing ${currentCount} of ${total} entries`;
+                            }
+                        })
+                        .catch(error => {
+                            console.error(error);
+                            Toastify({
+                                text: "Error deleting package",
+                                duration: 3000,
+                                close: true,
+                                gravity: "top",
+                                position: "right",
+                                backgroundColor: "#dc3545",
+                            }).showToast();
+                        });
+                }
+            </script>
+
+            <script>
+                // Fetch and update package list
+                function fetchPackages(page = 1, search = '') {
+                    const params = new URLSearchParams({ page, search });
+                    fetch(`/admin/package/package?${params.toString()}`, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            renderTable(data.packages);
+                            renderPagination(data.totalPages, data.currentPage, data.search);
+                            updateShowingText(data.packages.length, data.total);
+                        })
+                        .catch(err => console.error('Error:', err));
+                }
+
+                // Render table body rows dynamically
+                function renderTable(packages) {
+                    const tbody = packages.map(pkg => `
+            <tr class="bg-white">
+                <td>${pkg.id}</td>
+                <td>
+                    <strong>${pkg.title}</strong>
+                    <br>
+                    <small class="text-muted">${pkg.slug}</small>
+                </td>
+                <td>$${parseFloat(pkg.price).toFixed(2)}</td>
+                <td>${pkg.mainImage
+                            ? `<img src="${pkg.mainImage}" class="img-thumbnail" style="max-height: 40px; max-width: 60px;" />`
+                            : `<span class="text-gray">No image</span>`}
+                </td>
+                <td>${pkg.featured
+                            ? '<span class="badge bg-success">Yes</span>'
+                            : '<span class="badge bg-secondary">No</span>'}</td>
+                <td>${pkg.fixed_departure
+                            ? '<span class="badge bg-success">Yes</span>'
+                            : '<span class="badge bg-secondary">No</span>'}</td>
+                <td>${pkg.is_active
+                            ? '<span class="badge bg-success">Active</span>'
+                            : '<span class="badge bg-danger">Inactive</span>'}</td>
+                <td class="text-gray">${new Date(pkg.updated_at).toLocaleDateString()}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-dark dropdown-toggle" data-bs-toggle="dropdown">Actions</button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                            <li><a class="dropdown-item text-gray" href="/admin/package/renderPackageDetail/${pkg.id}">
+                                 View
+                            </a></li>
+                            <li><a class="dropdown-item text-gray" href="/admin/package/renderEditPage/${pkg.id}">
+                                 Edit
+                            </a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item text-danger" href="#" 
+                                onclick="deletePackage(${pkg.id})">
+                                 Delete
+                            </a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+                    document.querySelector('#package-table-container tbody').innerHTML = tbody;
+                }
+
+                // Render pagination buttons dynamically
+                function renderPagination(totalPages, currentPage, search) {
+                    let paginationHTML = '';
+                    for (let i = 1; i <= totalPages; i++) {
+                        paginationHTML += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="fetchPackages(${i}, '${search}')">${i}</a>
+                </li>`;
+                    }
+                    document.querySelector('#package-table-container .pagination').innerHTML = paginationHTML;
+                }
+
+                // Update the "Showing X of Y entries" text dynamically
+                function updateShowingText(currentCount, total) {
+                    const textDiv = document.querySelector('.card-footer .text-gray');
+                    if (textDiv) {
+                        textDiv.textContent = `Showing ${currentCount} of ${total} entries`;
+                    }
+                }
+
+                // Intercept form submit and fetch via AJAX
+                document.getElementById('searchForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const search = this.search.value.trim();
+                    fetchPackages(1, search);
+                });
+            </script>

@@ -1,7 +1,7 @@
 <%- include('../layout/header') %>
     <%- include('../layout/sidebar') %>
 
-        <div class="content-wrapper bg-white">
+        <div class="app-main bg-white">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -28,7 +28,7 @@
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
                                 </div>
                                 <a href="/admin/state/renderAddPage" class="btn btn-sm btn-outline-dark">
-                                    <i class="fas fa-plus"></i> Add New
+                                     Add New
                                 </a>
                             </div>
                         </div>
@@ -88,13 +88,13 @@
                                                         <li>
                                                             <a class="dropdown-item text-gray"
                                                                 href="/admin/state/renderStateDetail/<%= state.id %>">
-                                                                <i class="fas fa-eye me-2"></i> View
+                                                                 View
                                                             </a>
                                                         </li>
                                                         <li>
                                                             <a class="dropdown-item text-gray"
                                                                 href="/admin/state/renderEditPage/<%= state.id %>">
-                                                                <i class="fas fa-edit me-2"></i> Edit
+                                                                 Edit
                                                             </a>
                                                         </li>
                                                         <li>
@@ -104,7 +104,7 @@
                                                             <a class="dropdown-item text-gray"
                                                                 href="/admin/state/delete/<%= state.id %>"
                                                                 onclick="return confirm('Are you sure you want to delete <%= state.name %> state?');">
-                                                                <i class="fas fa-trash-alt me-2"></i> Delete
+                                                                 Delete
                                                             </a>
 
                                                         </li>

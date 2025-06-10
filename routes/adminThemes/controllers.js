@@ -19,13 +19,13 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
         content,
         meta_title,
         meta_description,
-        meta_keywords,
+        canonical_url,
         image
     } = req.body;
 
     try {
         if (!name || !slug || (!image && !req.filePath)) {
-            return res.status(400).send('Name and slug are required.');
+            return res.status(400).json({ message: 'Name, Image and slug fields cannot be Empty.' });
         }
 
         const cleanContent = removeDataMceSrc(content);
@@ -33,7 +33,7 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
         const [result] = await db.query(`
             INSERT INTO theme (
                 name, slug, description, content,
-                meta_title, meta_description, meta_keywords, image
+                meta_title, meta_description, canonical_url, image
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             name,
@@ -42,20 +42,17 @@ router.post('/theme/add', isAdmin, dynamicImageUpload.single('image'), async (re
             cleanContent || null,
             meta_title || null,
             meta_description || null,
-            meta_keywords || null,
+            canonical_url || null,
             req.filePath || image || null
         ]);
 
         // console.log(result, '<= Theme insert result');
 
-        res.redirect('/admin/theme/theme');
+        // res.redirect('/admin/theme/theme');
+        res.status(200).json({ message: 'Theme added successfully', success: true });
     } catch (err) {
         console.error(err);
-        if (err.code === 'ER_DUP_ENTRY') {
-            res.status(400).send('Slug must be unique.');
-        } else {
-            res.status(500).send({'Error saving theme.': err});
-        }
+        res.status(500).json({ message: err.sqlMessage, 'Error saving theme.': err });
     }
 });
 
@@ -68,14 +65,14 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
             content,
             meta_title,
             meta_description,
-            meta_keywords
+            canonical_url
         } = req.body;
         const id = req.params.id;
 
         const image = req.filePath; // might be undefined if no new image uploaded
 
         if (!id) {
-            return res.status(400).send({ message: "Missing theme ID" });
+            return res.status(400).json({ message: "Missing theme ID" });
         }
 
         // Build update query dynamically only for fields present
@@ -90,9 +87,9 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
             fields.push('slug = ?');
             values.push(slug);
         }
-        if (meta_keywords !== undefined) {
-            fields.push('meta_keywords = ?');
-            values.push(meta_keywords);
+        if (canonical_url !== undefined) {
+            fields.push('canonical_url = ?');
+            values.push(canonical_url);
         }
         if (description !== undefined) {
             fields.push('description = ?');
@@ -116,7 +113,7 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
         }
 
         if (fields.length === 0) {
-            return res.status(400).send({ message: 'No fields to update' });
+            return res.status(400).json({ message: 'No fields to update' });
         }
 
         values.push(id);
@@ -143,10 +140,22 @@ router.post('/theme/update/:id', isAdmin, dynamicImageUpload.single('image'), as
 
         await db.execute(updateQuery, values);
 
-        res.redirect('/admin/theme/theme');
+        return res.status(200).json({
+            success: true,
+            message: 'Theme updated successfully'
+        });
+        // if (req.headers.accept.includes('application/json')) {
+        //     return res.status(200).json({ success: true, message: 'Theme updated successfully' });
+        // } else {
+        //     return res.redirect('/admin/theme/theme');
+        // }
+
     } catch (err) {
         console.error('Error updating theme:', err);
-        res.status(500).send({ message: 'Internal server error', error: err });
+        return res.status(500).json({
+            success: false,
+            message: err.sqlMessage || 'Error updating theme'
+        });
     }
 });
 
@@ -165,7 +174,7 @@ router.post('/theme/delete/:id', isAdmin, async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error('Error deleting theme:', error);
-        res.status(500).send({ message: 'Internal server error', error });
+        res.status(500).json({ message: err.sqlMessage, error });
     }
 })
 

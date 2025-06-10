@@ -1,7 +1,7 @@
 <%- include('../layout/header') %>
     <%- include('../layout/sidebar') %>
 
-        <div class="content-wrapper bg-white">
+        <div class="app-main bg-white">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -24,7 +24,7 @@
                                     <h3 class="card-title">All Themes</h3>
                                     <div class="card-tools">
                                         <a href="/admin/theme/renderAddPage" class="btn btn-sm btn-outline-dark">
-                                            <i class="fas fa-plus"></i> Add New
+                                             Add New
                                         </a>
                                     </div>
                                 </div>
@@ -81,13 +81,13 @@
                                                                 <li>
                                                                     <a class="dropdown-item text-gray"
                                                                         href="/admin/theme/renderThemeDetail/<%= theme.id %>">
-                                                                        <i class="fas fa-eye me-2"></i> View Details
+                                                                         View Details
                                                                     </a>
                                                                 </li>
                                                                 <li>
                                                                     <a class="dropdown-item text-gray"
                                                                         href="/admin/theme/renderEditPage/<%= theme.id %>">
-                                                                        <i class="fas fa-edit me-2"></i> Edit
+                                                                         Edit
                                                                     </a>
                                                                 </li>
                                                                 <li>
@@ -97,7 +97,7 @@
                                                                     <a class="dropdown-item text-gray delete-theme-btn"
                                                                         href="#" data-theme-id="<%= theme.id %>"
                                                                         data-theme-name="<%= theme.name %>">
-                                                                        <i class="fas fa-trash-alt me-2"></i> Delete
+                                                                         Delete
                                                                     </a>
                                                                 </li>
                                                             </ul>

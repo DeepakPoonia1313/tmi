@@ -1,7 +1,7 @@
 <%- include('../layout/header') %>
     <%- include('../layout/sidebar') %>
 
-        <div class="content-wrapper bg-white">
+        <div class="app-main bg-white">
             <section class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
@@ -24,7 +24,7 @@
                                     <h3 class="card-title">All Regions</h3>
                                     <div class="card-tools">
                                         <a href="/admin/region/renderAddPage" class="btn btn-sm btn-outline-dark">
-                                            <i class="fas fa-plus"></i> Add New
+                                            Add New
                                         </a>
                                     </div>
                                 </div>
@@ -76,32 +76,39 @@
                                                     </td>
                                                     <td class="align-middle">
                                                         <div class="dropdown">
-                                                            <button class="btn btn-sm btn-outline-dark d-flex justify-content-center align-items-center"
-                                                                style="width: 40px; height: 40px;"
-                                                                type="button" data-bs-toggle="dropdown">
+                                                            <button
+                                                                class="btn btn-sm btn-outline-dark d-flex justify-content-center align-items-center"
+                                                                style="width: 40px; height: 40px;" type="button"
+                                                                data-bs-toggle="dropdown">
                                                                 ...
                                                             </button>
                                                             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                                                 <li>
                                                                     <a class="dropdown-item text-gray"
                                                                         href="/admin/region/renderRegionDetail/<%= region.id %>">
-                                                                        <i class="fas fa-eye me-2"></i> View Details
+                                                                        View Details
                                                                     </a>
                                                                 </li>
                                                                 <li>
                                                                     <a class="dropdown-item text-gray"
                                                                         href="/admin/region/renderEditPage/<%= region.id %>">
-                                                                        <i class="fas fa-edit me-2"></i> Edit
+                                                                        Edit
                                                                     </a>
                                                                 </li>
                                                                 <li>
                                                                     <hr class="dropdown-divider">
                                                                 </li>
                                                                 <li>
-                                                                    <a class="dropdown-item text-gray"
+                                                                    <!-- <a class="dropdown-item text-gray"
                                                                         href="/admin/region/delete/<%= region.id %>"
                                                                         onclick="return confirm('Are you sure you want to delete <%= region.name %> region?');">
-                                                                        <i class="fas fa-trash-alt me-2"></i> Delete
+                                                                         Delete
+                                                                    </a> -->
+                                                                    <a href="#"
+                                                                        class="dropdown-item text-gray delete-region-btn"
+                                                                        data-id="<%= region.id %>"
+                                                                        data-name="<%= region.name %>">
+                                                                        Delete
                                                                     </a>
                                                                 </li>
                                                             </ul>
@@ -202,3 +209,40 @@
                     font-weight: 600;
                 }
             </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const deleteButtons = document.querySelectorAll('.delete-region-btn');
+
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function (e) {
+                            e.preventDefault();
+
+                            const regionId = this.getAttribute('data-id');
+                            const regionName = this.getAttribute('data-name');
+
+                            if (!confirm(`Are you sure you want to delete ${regionName} region?`)) {
+                                return;
+                            }
+
+                            fetch(`/admin/region/delete/${regionId}`, {
+                                method: 'GET'
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        // Remove the row from the DOM
+                                        const row = this.closest('tr');
+                                        row.parentNode.removeChild(row);
+                                    } else {
+                                        alert('Failed to delete the region.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    alert('An error occurred while deleting.');
+                                });
+                        });
+                    });
+                });
+            </script>

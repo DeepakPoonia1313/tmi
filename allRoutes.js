@@ -17,6 +17,10 @@ import adminPackageControllerRoutes from './routes/adminPackages/controllerRoute
 import adminHotelRoutes from './routes/adminHotels/ejsRoutes.js';
 import adminHotelControllerRoutes from './routes/adminHotels/controllers.js';
 
+// itinerary routes
+import adminItineraryRoutes from './routes/itinerary/ejsRoutes.js';
+import adminItineraryControllerRoutes from './routes/itinerary/controllerRoutes.js';
+
 const mainRouter = express.Router();
 
 mainRouter.use('/api', routes);
@@ -28,7 +32,7 @@ mainRouter.use('/admin', adminDestRoutes)
 mainRouter.use('/admin', adminThemRoutes);
 mainRouter.use('/admin', adminPackageRoutes);
 mainRouter.use('/admin', adminHotelRoutes);
-
+mainRouter.use('/admin', adminItineraryRoutes);
 
 // controller routes
 mainRouter.use('/admin', adminDestControllerRoutes)
@@ -36,6 +40,7 @@ mainRouter.use('/admin', adminDestControllerRoutes)
 mainRouter.use('/admin', adminThemeControllerRoutes);
 mainRouter.use('/admin', adminPackageControllerRoutes);
 mainRouter.use('/admin', adminHotelControllerRoutes);
+mainRouter.use('/admin', adminItineraryControllerRoutes);
 
 
 export default mainRouter;

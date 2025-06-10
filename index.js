@@ -51,6 +51,7 @@ const startServer = async () => {
 
 
         app.post('/upload/:module/:moduleId', dynamicImageUpload.single('image'), (req, res) => {
+            res.setHeader('Content-Type', 'application/json'); // ✅ force JSON
             res.json({
                 message: 'File uploaded successfully',
                 file: `${base_url}/${req.filePath}`,

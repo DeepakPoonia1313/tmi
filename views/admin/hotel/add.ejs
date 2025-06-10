@@ -10,14 +10,14 @@
                             <li class="breadcrumb-item">
                                 <a href="<%= crumb.url %>" class="text-decoration-none text-primary">
                                     <% if (index===0) { %>
-                                        <i class="fas fa-home me-1"></i>
+                                        
                                         <% } %>
                                             <%= crumb.label %>
                                 </a>
                             </li>
                             <% } else { %>
                                 <li class="breadcrumb-item active" aria-current="page">
-                                    <i class="fas fa-hotel me-1"></i>
+                                    
                                     <%= crumb.label %>
                                 </li>
                                 <% } %>
@@ -29,7 +29,7 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white border-bottom py-3">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-hotel me-2 text-primary"></i>
+                        
                         <h5 class="mb-0 fw-semibold">Add New Hotel</h5>
                     </div>
                 </div>
@@ -37,6 +37,8 @@
                 <div class="card-body p-4">
                     <form action="/admin/hotel/add?module=hotel&moduleId=hotel" method="POST"
                         enctype="multipart/form-data">
+                        <input type="hidden" name="module" value="hotel">
+                        <input type="hidden" name="moduleId" value="hotel">
                         <div class="row g-4">
                             <!-- Left Column -->
                             <div class="col-lg-6">
@@ -45,8 +47,7 @@
                                     <label class="form-label fw-medium">Hotel Name <span
                                             class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-white"><i
-                                                class="fas fa-hotel text-muted"></i></span>
+                                        
                                         <input type="text" name="name" id="name" class="form-control" maxlength="255"
                                             required placeholder="Enter hotel name" />
                                     </div>
@@ -56,11 +57,9 @@
                                 <div class="mb-3">
                                     <label class="form-label fw-medium">Slug <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-white">
-                                            <i class="fas fa-link text-muted"></i>
-                                        </span>
+                                        
                                         <input type="text" name="slug" id="slug" class="form-control" required
-                                            placeholder="Enter URL slug" />
+                                            placeholder="Enter slug" />
                                     </div>
                                 </div>
 
@@ -104,7 +103,7 @@
                                 <div class="mb-3">
                                     <label class="form-label fw-medium">Price/Day</label>
                                     <div class="input-group">
-                                        <span class="input-group-text bg-white">$</span>
+                                        <span class="input-group-text bg-white">₹</span>
                                         <input type="number" name="price_per_night" id="price_per_night"
                                             class="form-control" placeholder="0.00" />
                                     </div>
@@ -115,15 +114,15 @@
                             <div class="col-lg-6">
                                 <!-- Main Image Upload -->
                                 <div class="mb-3">
-                                    <label class="form-label fw-medium">Main Image</label>
+                                    <label class="form-label fw-medium">Featured Image</label>
                                     <div class="border rounded p-3 text-center bg-light">
                                         <div id="image-preview-container" class="mb-2" style="min-height: 120px;">
                                             <img id="image-preview" src="#" alt="Preview"
                                                 class="img-fluid rounded d-none" style="max-height: 120px;">
                                             <div id="image-placeholder"
                                                 class="d-flex flex-column align-items-center justify-content-center h-100 text-muted">
-                                                <i class="fas fa-image fa-2x mb-2"></i>
-                                                <span>Main image preview</span>
+                                                
+                                                <span>Feature image preview</span>
                                             </div>
                                         </div>
                                         <input type="file" class="form-control" name="image" id="image" accept="image/*"
@@ -139,7 +138,7 @@
                                         <div id="additional-images-preview" class="d-flex flex-wrap gap-2 mb-2">
                                             <div class="d-flex flex-column align-items-center justify-content-center w-100 text-muted"
                                                 style="min-height: 80px;">
-                                                <i class="fas fa-images fa-2x mb-2"></i>
+                                                
                                                 <span>Additional images preview</span>
                                             </div>
                                         </div>
@@ -155,8 +154,7 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Phone</label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white"><i
-                                                        class="fas fa-phone text-muted"></i></span>
+                                                
                                                 <input type="text" name="phone" maxlength="12" id="phone"
                                                     class="form-control" placeholder="Phone number" />
                                             </div>
@@ -166,8 +164,6 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Email</label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white"><i
-                                                        class="fas fa-envelope text-muted"></i></span>
                                                 <input type="email" name="email" id="email" class="form-control"
                                                     placeholder="Email address" />
                                             </div>
@@ -177,8 +173,7 @@
                                         <div class="mb-3">
                                             <label class="form-label fw-medium">Website</label>
                                             <div class="input-group">
-                                                <span class="input-group-text bg-white"><i
-                                                        class="fas fa-globe text-muted"></i></span>
+                                                
                                                 <input type="url" name="website" id="website" class="form-control"
                                                     placeholder="Website URL" />
                                             </div>
@@ -215,11 +210,56 @@
                         </div>
 
                         <!-- Content Editor -->
-                        <div class="mb-4">
+                        <!-- <div class="mb-4">
                             <label class="form-label fw-medium">Full Content</label>
                             <div class="border rounded bg-white p-2">
                                 <input type="hidden" name="content" id="content" />
                                 <div id="editor" style="min-height: 300px; max-height: 300px; overflow-y: scroll;">
+                                </div>
+                            </div>
+                        </div> -->
+                        <div class="editor-container mb-3">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Content</label>
+                                        <textarea id="editor" name="content" class="form-control"
+                                            style="min-height: 300px;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="gallery-section">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h5 class="mb-0">Gallery</h5>
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                id="gallery-image-button">
+                                                 Add
+                                            </button>
+                                        </div>
+
+                                        <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                                            <% if (images && images.length> 0) { %>
+                                                <div class="row g-3">
+                                                    <% images.reverse().forEach((image, index)=> { %>
+                                                        <div
+                                                            class="col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center">
+                                                            <img src="<%= image %>" alt="Uploaded Image"
+                                                                class="img-fluid rounded selectable-image border border-secondary"
+                                                                style="max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;"
+                                                                onclick="insertToEditor('<%= image %>')" />
+                                                        </div>
+                                                        <% }) %>
+                                                </div>
+                                                <% } else { %>
+                                                    <div class="text-center py-3">
+                                                        <p class="text-muted">No previously uploaded images.</p>
+                                                    </div>
+                                                    <% } %>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +270,7 @@
                                 <h2 class="accordion-header">
                                     <button class="accordion-button bg-light py-2 collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#seoCollapse">
-                                        <i class="fas fa-search me-2 text-primary"></i>
+                                        
                                         <span class="fw-medium">SEO Settings</span>
                                     </button>
                                 </h2>
@@ -247,9 +287,9 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label class="form-label fw-medium">Meta Keywords</label>
-                                                    <input name="meta_keywords" id="meta_keywords" class="form-control"
-                                                        placeholder="Comma-separated keywords" />
+                                                    <label class="form-label fw-medium">Canonical Url</label>
+                                                    <input type="url" name="canonical_url" id="canonical_url" class="form-control"
+                                                        placeholder="Canonical URL" />
                                                 </div>
                                             </div>
                                             <div class="col-12">
@@ -269,14 +309,14 @@
                         <!-- Submit Buttons -->
                         <div class="d-flex justify-content-between border-top pt-4">
                             <button type="reset" class="btn btn-outline-secondary">
-                                <i class="fas fa-undo me-1"></i> Reset
+                                 Reset
                             </button>
                             <div>
                                 <a href="/admin/hotel/hotel" class="btn btn-outline-danger me-2">
-                                    <i class="fas fa-times me-1"></i> Cancel
+                                     Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-1"></i> Save Hotel
+                                     Save Hotel
                                 </button>
                             </div>
                         </div>
@@ -305,33 +345,6 @@
                 max-height: 80px;
                 object-fit: cover;
                 border-radius: 4px;
-            }
-        </style>
-
-        <!-- Quill Editor + Image Toolbar -->
-        <div id="image-toolbar">
-            <button data-align="left">⬅️</button>
-            <button data-align="center">🔳</button>
-            <button data-align="right">➡️</button>
-        </div>
-
-        <style>
-            #image-toolbar {
-                position: absolute;
-                display: none;
-                background: #f8f9fa;
-                border: 1px solid #ddd;
-                padding: 5px 10px;
-                border-radius: 5px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                z-index: 1000;
-            }
-
-            #image-toolbar button {
-                border: none;
-                background: none;
-                margin: 0 5px;
-                cursor: pointer;
             }
         </style>
 
@@ -375,102 +388,183 @@
                 } else {
                     previewContainer.innerHTML = `
                 <div class="d-flex flex-column align-items-center justify-content-center w-100 text-muted" style="min-height: 80px;">
-                    <i class="fas fa-images fa-2x mb-2"></i>
+                    
                     <span>Additional images preview</span>
                 </div>
             `;
                 }
             }
         </script>
+
+        <!-- <script>
+            tinymce.init({
+                selector: '#editor',
+                height: 500,
+                plugins: 'image link code lists table',
+                toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | link | table | code',
+                menubar: false,
+                setup: function (editor) {
+                    // On form submit, set hidden input with editor content
+                    // document.querySelector('form').addEventListener('submit', function () {
+                    //     document.querySelector('#content').value = editor.getContent();
+                    // });
+
+                    // Expose function globally to insert image into editor
+                    window.insertToEditor = function (imageUrl) {
+                        editor.insertContent(`<img style="max-width: 300px;" src="${imageUrl}" />`);
+                    };
+
+                    // Handle custom image upload from the button
+                    document.getElementById('gallery-image-button').addEventListener('click', () => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.click();
+
+                        input.onchange = async () => {
+                            const file = input.files[0];
+                            const formData = new FormData();
+                            formData.append('image', file);
+
+                            try {
+                                const res = await fetch('/upload/hotel/content', {
+                                    method: 'POST',
+                                    body: formData,
+                                });
+
+                                if (!res.ok) throw new Error('Upload failed');
+
+                                const data = await res.json();
+                                const url = data.file;
+
+                                // Insert into editor
+                                editor.insertContent(`<img style="max-width: 300px;" src="${url}" />`);
+
+                                // Add to gallery
+                                const row = document.querySelector('.gallery-section .row.g-2');
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-6 col-md-4';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image';
+                                img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            } catch (err) {
+                                console.error('Image upload failed', err);
+                            }
+                        };
+                    });
+                }
+            });
+        </script> -->
+
         <script>
-            const quill = new Quill('#editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        [{ header: [1, 2, false] }],
-                        ['bold', 'italic', 'underline'],
-                        ['blockquote', 'code-block'],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        ['link', 'image'],
-                        ['clean']
-                    ]
-                }
-            });
+            document.addEventListener('DOMContentLoaded', () => {
+                const btns = [
+                    "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+                    "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+                    "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+                    "undo", "redo", "print", "selectall", "code"
+                ];
 
-            document.querySelector('form').addEventListener('submit', () => {
-                document.querySelector('#content').value = quill.root.innerHTML;
-            });
+                const editor = Jodit.make('#editor', {
+                    height: 500,
+                    buttons: btns,
+                    toolbarAdaptive: false,
+                    defaultActionOnPaste: "insert_clear_html"
+                });
 
-            const toolbar = quill.getModule('toolbar');
-            toolbar.addHandler('image', () => {
-                const input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-                input.click();
-
-                input.onchange = async () => {
-                    const file = input.files[0];
-                    const formData = new FormData();
-                    formData.append('image', file);
-
-                    try {
-                        const res = await fetch('/upload/hotel/content', {
-                            method: 'POST',
-                            body: formData,
-                        });
-
-                        if (!res.ok) throw new Error('Upload failed');
-
-                        const data = await res.json();
-                        const url = data.file;
-
-                        const range = quill.getSelection();
-                        const imgTag = `<img style="max-width: 300px;" src="${url}">`;
-                        quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
-                    } catch (err) {
-                        console.error('Image upload failed', err);
+                // Add 'img-fluid' class to inserted <img> tags on content change
+                editor.events.on('change', function (text) {
+                    const parser = new DOMParser();
+                    const htmlDoc = parser.parseFromString(text, 'text/html');
+                    const imgs = htmlDoc.getElementsByTagName('img');
+                    if (imgs) {
+                        for (const img of imgs) {
+                            if (!img.classList.contains('img-fluid')) {
+                                img.classList.add('img-fluid');
+                            }
+                        }
                     }
+                    text = htmlDoc.body.innerHTML;
+                });
+
+                // Override insertHTML to sanitize HTML using DOMPurify
+                editor.selection.originalInsertHTML = editor.selection.insertHTML;
+                editor.selection.insertHTML = html => {
+                    var clean = DOMPurify.sanitize(html, {
+                        ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+                        ALLOWED_TAGS: [
+                            'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                            'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                            'iframe', 'b', 'a'
+                        ]
+                    });
+                    return editor.selection.originalInsertHTML(clean);
                 };
-            });
 
-            const imageToolbar = document.getElementById('image-toolbar');
-            quill.root.addEventListener('click', (e) => {
-                if (e.target.tagName === 'IMG') {
-                    const rect = e.target.getBoundingClientRect();
-                    imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
-                    imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
-                    imageToolbar.style.display = 'flex';
-                    imageToolbar.currentImage = e.target;
-                } else {
-                    imageToolbar.style.display = 'none';
-                }
-            });
+                // Define insertToEditor globally
+                window.insertToEditor = function (imageUrl) {
+                    editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${imageUrl}" />`);
+                };
 
-            imageToolbar.addEventListener('click', (e) => {
-                const el = imageToolbar.currentImage;
-                const align = e.target.dataset.align;
-                if (!el || !align) return;
+                // Upload image manually from 'Add' button
+                document.getElementById('gallery-image-button').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
 
-                if (align === 'left') {
-                    el.style.float = 'left';
-                    el.style.marginRight = '50px';
-                    el.style.marginLeft = '0';
-                    el.style.display = '';
-                } else if (align === 'right') {
-                    el.style.float = 'right';
-                    el.style.marginLeft = '50px';
-                    el.style.marginRight = '0';
-                    el.style.display = '';
-                } else if (align === 'center') {
-                    el.style.float = '';
-                    el.style.marginLeft = 'auto';
-                    el.style.marginRight = 'auto';
-                    el.style.display = 'block';
-                }
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('image', file);
 
-                imageToolbar.style.display = 'none';
+                        try {
+                            const res = await fetch('/upload/region/content', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            if (!res.ok) throw new Error('Upload failed');
+
+                            const data = await res.json();
+                            const url = data.file;
+
+                            // Insert into editor
+                            editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${url}" />`);
+
+                            // Add to gallery (if gallery row exists)
+                            const row = document.querySelector('.gallery-section .row.g-3');
+                            if (row) {
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center';
+
+                                const img = document.createElement('img');
+                                img.src = url;
+                                img.alt = 'Uploaded Image';
+                                img.className = 'img-fluid rounded selectable-image border border-secondary';
+                                img.style.cssText = 'max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;';
+                                img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                                colDiv.appendChild(img);
+                                row.prepend(colDiv);
+                            }
+                        } catch (err) {
+                            console.error('Image upload failed', err);
+                        }
+                    };
+                });
             });
         </script>
+
+
+
         <script>
             document.getElementById('name').addEventListener('input', function () {
                 const slug = this.value

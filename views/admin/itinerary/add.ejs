@@ -1,0 +1,698 @@
+<%- include('../layout/header') %>
+    <%- include('../layout/sidebar') %>
+
+        <div class="container mt-4">
+            <!-- Enhanced Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb p-2 bg-light rounded-3" style="--bs-breadcrumb-divider: '›';">
+                    <% breadcrumbs.forEach((crumb, index)=> { %>
+                        <% if (crumb.url && index !==breadcrumbs.length - 1) { %>
+                            <li class="breadcrumb-item">
+                                <a href="<%= crumb.url %>" class="text-decoration-none text-primary">
+                                    <%= crumb.label %>
+                                </a>
+                            </li>
+                            <% } else { %>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    <%= crumb.label %>
+                                </li>
+                                <% } %>
+                                    <% }) %>
+                </ol>
+            </nav>
+
+            <!-- Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 fw-semibold">Add New Itinerary</h5>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+                    <form action="/admin/itinerary/add?module=itinerary&moduleId=itinerary" method="POST"
+                        enctype="multipart/form-data">
+                        <input type="hidden" name="module" value="itinerary">
+                        <input type="hidden" name="moduleId" value="itinerary">
+
+                        <div class="row g-4">
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Package <span
+                                            class="text-danger">*</span></label>
+                                    <select name="package_id" id="package_id" class="form-select" required></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Itinerary Items Container -->
+                        <div id="itinerary-container">
+                            <!-- First Itinerary Item -->
+                            <div class="itinerary-item card mb-4">
+                                <div
+                                    class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Day <span class="day-number">1</span></h6>
+                                    <!-- <button type="button" class="btn btn-sm btn-danger remove-itinerary"
+                                        style="display: none;">Remove</button> -->
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-4">
+                                        <div class="col-lg-3">
+                                            <!-- Day Number -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Day Number <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="number" name="itineraries[0][day_number]"
+                                                    class="form-control day-number-input" placeholder="Enter day number"
+                                                    required min="1" value="1" />
+                                            </div>
+
+                                            <!-- City From -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">City From</label>
+                                                <select name="itineraries[0][location_from]"
+                                                    class="form-select location-from-select"></select>
+                                            </div>
+
+                                            <!-- City To -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">City To</label>
+                                                <select name="itineraries[0][location_to]"
+                                                    class="form-select location-to-select"></select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Stay (hotel)</label>
+                                                <select name="itineraries[0][hotel_id]"
+                                                    class="form-select hotel-select"></select>
+                                            </div>
+
+                                            <!-- Distance -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Distance (in km)</label>
+                                                <input type="number" name="itineraries[0][distance]"
+                                                    class="form-control" placeholder="Enter distance in kilometers" />
+                                            </div>
+
+                                            <!-- Duration -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Duration (hours)</label>
+                                                <input type="number" name="itineraries[0][duration]"
+                                                    class="form-control"
+                                                    placeholder="Time to cover the distance in hours" />
+                                            </div>
+
+                                            <!-- Theme -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-medium">Theme</label>
+                                                <select name="itineraries[0][theme_id]"
+                                                    class="form-select theme-select">
+                                                    <option value="">--Select--</option>
+                                                    <% themes.forEach(theme=> { %>
+                                                        <option value="<%= theme.id %>">
+                                                            <%= theme.name %>
+                                                        </option>
+                                                        <% }); %>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-9">
+                                            <!-- Content Editor -->
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Content</label>
+                                                <textarea class="form-control itinerary-content"
+                                                    name="itineraries[0][content]"
+                                                    style="min-height: 300px;"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add More Itinerary Button -->
+                        <div class="mb-4">
+                            <button type="button" id="add-itinerary" class="btn btn-secondary">
+                                <i class="bi bi-plus-circle me-2"></i>Add Another Day
+                            </button>
+                        </div>
+
+                        <!-- Gallery Section -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="gallery-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Gallery</h5>
+                                        <button type="button" class="btn btn-primary btn-sm" id="gallery-image-button">
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                                        <% if (images && images.length> 0) { %>
+                                            <div class="row g-3">
+                                                <% images.reverse().forEach((image, index)=> { %>
+                                                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                                        <div class="card h-100 mt-4 shadow-sm">
+                                                            <div class="card-img-top d-flex justify-content-center align-items-center p-2"
+                                                                style="height: 150px;">
+                                                                <img src="<%= image %>" alt="Uploaded Image"
+                                                                    class="img-fluid rounded cursor-pointer"
+                                                                    style="max-height: 100%; width: auto;" />
+                                                            </div>
+                                                            <div class="card-body p-2">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center">
+                                                                    <small class="text-muted text-truncate me-2"
+                                                                        style="max-width: 70%;">
+                                                                        Image <%= index + 1 %>
+                                                                    </small>
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-secondary copy-url-btn"
+                                                                        data-url="<%= image %>" title="Copy URL">
+                                                                        <i class="bi bi-clipboard"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                            </div>
+                                            <% } else { %>
+                                                <div class="text-center py-3">
+                                                    <p class="text-muted">No previously uploaded images.</p>
+                                                </div>
+                                                <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between border-top pt-4">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                Reset
+                            </button>
+                            <div>
+                                <a href="/admin/itinerary/itinerary" class="btn btn-outline-danger me-2">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    Save Itineraries
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Styling -->
+        <style>
+            .card-header {
+                border-bottom: none;
+            }
+
+            .form-control:focus,
+            .form-select:focus {
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+            }
+
+            .itinerary-item {
+                border: 1px solid #dee2e6;
+                border-radius: 0.375rem;
+            }
+
+            .itinerary-item .card-header {
+                background-color: #f8f9fa !important;
+            }
+
+            .copy-url-btn:hover {
+                background-color: #f8f9fa;
+            }
+
+            .toast {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 9999;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize editors for itinerary items
+                const initializeEditor = (textareaElement, index) => {
+                    const btns = [
+                        "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+                        "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+                        "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+                        "undo", "redo", "print", "selectall", "code"
+                    ];
+
+                    const editor = Jodit.make(textareaElement, {
+                        height: 550,
+                        buttons: btns,
+                        toolbarAdaptive: false,
+                        defaultActionOnPaste: "insert_clear_html"
+                    });
+
+                    // Add 'img-fluid' class to inserted <img> tags on content change
+                    editor.events.on('change', function (text) {
+                        const parser = new DOMParser();
+                        const htmlDoc = parser.parseFromString(text, 'text/html');
+                        const imgs = htmlDoc.getElementsByTagName('img');
+                        if (imgs) {
+                            for (const img of imgs) {
+                                if (!img.classList.contains('img-fluid')) {
+                                    img.classList.add('img-fluid');
+                                }
+                            }
+                        }
+                        text = htmlDoc.body.innerHTML;
+                    });
+
+                    // Override insertHTML to sanitize HTML using DOMPurify
+                    editor.selection.originalInsertHTML = editor.selection.insertHTML;
+                    editor.selection.insertHTML = html => {
+                        var clean = DOMPurify.sanitize(html, {
+                            ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+                            ALLOWED_TAGS: [
+                                'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                                'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                                'iframe', 'b', 'a'
+                            ]
+                        });
+                        return editor.selection.originalInsertHTML(clean);
+                    };
+
+                    return editor;
+                };
+
+                // Initialize the first editor
+                const firstEditor = initializeEditor(document.querySelector('.itinerary-content'), 0);
+
+                // Add itinerary item
+                let itineraryCounter = 1;
+                document.getElementById('add-itinerary').addEventListener('click', () => {
+                    const newItem = document.createElement('div');
+                    newItem.className = 'itinerary-item card mb-4';
+                    newItem.innerHTML = `
+                <div class="bg-light p-2 d-flex justify-content-between align-items-center">
+    <h6 class="mb-0">Day <span class="day-number">${itineraryCounter + 1}</span></h6>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-sm btn-danger remove-itinerary">Remove</button>
+    </div>
+</div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-lg-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Day Number <span class="text-danger">*</span></label>
+                                <input type="number" name="itineraries[${itineraryCounter}][day_number]" class="form-control day-number-input" placeholder="Enter day number" required min="1" value="${itineraryCounter + 1}" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">City From</label>
+                                <select name="itineraries[${itineraryCounter}][location_from]" class="form-select location-from-select"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">City To</label>
+                                <select name="itineraries[${itineraryCounter}][location_to]" class="form-select location-to-select"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Stay (hotel)</label>
+                                <select name="itineraries[${itineraryCounter}][hotel_id]" class="form-select hotel-select"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Distance (in km)</label>
+                                <input type="number" name="itineraries[${itineraryCounter}][distance]" class="form-control" placeholder="Enter distance in kilometers" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Duration (hours)</label>
+                                <input type="number" name="itineraries[${itineraryCounter}][duration]" class="form-control" placeholder="Time to cover the distance in hours" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-medium">Theme</label>
+                                <select name="itineraries[${itineraryCounter}][theme_id]" class="form-select theme-select">
+                                    <option value="">--Select--</option>
+                                    <% themes.forEach(theme=> { %>
+                                        <option value="<%= theme.id %>">
+                                            <%= theme.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-9">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Content</label>
+                                <textarea class="form-control itinerary-content" name="itineraries[${itineraryCounter}][content]" style="min-height: 300px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+                    document.getElementById('itinerary-container').appendChild(newItem);
+
+                    // Initialize Select2 for the new selects
+                    $(newItem).find('.location-from-select, .location-to-select').select2({
+                        placeholder: 'Search for a city',
+                        ajax: {
+                            url: '/admin/api/cities',
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return {
+                                    q: params.term
+                                };
+                            },
+                            processResults: function (data) {
+                                return data;
+                            },
+                            cache: true
+                        },
+                        minimumInputLength: 2,
+                        width: '100%'
+                    });
+
+                    // Initialize Select2 for hotel_id
+                    $(newItem).find('.hotel-select').select2({
+                        placeholder: 'Search for a hotel',
+                        ajax: {
+                            url: '/admin/api/hotels',
+                            dataType: 'json',
+                            delay: 250,
+                            data: function (params) {
+                                return {
+                                    q: params.term
+                                };
+                            },
+                            processResults: function (data) {
+                                return data;
+                            },
+                            cache: true
+                        },
+                        minimumInputLength: 2,
+                        width: '100%'
+                    });
+
+                    // Initialize editor for the new content area
+                    const newTextarea = newItem.querySelector('.itinerary-content');
+                    initializeEditor(newTextarea, itineraryCounter);
+
+                    // Add remove event listener
+                    newItem.querySelector('.remove-itinerary').addEventListener('click', () => {
+                        newItem.remove();
+                        // Update day numbers
+                        updateDayNumbers();
+                    });
+
+                    // Show remove button on first item if there are multiple
+                    if (itineraryCounter === 1) {
+                        document.querySelector('.itinerary-item .remove-itinerary').style.display = 'block';
+                    }
+
+                    itineraryCounter++;
+                });
+
+                // Update day numbers when items are removed
+                function updateDayNumbers() {
+                    const items = document.querySelectorAll('.itinerary-item');
+                    items.forEach((item, index) => {
+                        const dayNumberSpan = item.querySelector('.day-number');
+                        const dayNumberInput = item.querySelector('.day-number-input');
+
+                        dayNumberSpan.textContent = index + 1;
+                        dayNumberInput.value = index + 1;
+
+                        // Update the name attribute to maintain array order
+                        const inputs = item.querySelectorAll('[name^="itineraries["]');
+                        inputs.forEach(input => {
+                            const name = input.name.replace(/itineraries\[\d+\]/, `itineraries[${index}]`);
+                            input.name = name;
+                        });
+                    });
+
+                    // Hide remove button if only one item remains
+                    if (items.length === 1) {
+                        items[0].querySelector('.remove-itinerary').style.display = 'none';
+                    }
+                }
+
+                // Initialize Select2 for the first set of selects
+                $('.location-from-select, .location-to-select').select2({
+                    placeholder: 'Search for a city',
+                    ajax: {
+                        url: '/admin/api/cities',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            return data;
+                        },
+                        cache: true
+                    },
+                    minimumInputLength: 2,
+                    width: '100%'
+                });
+
+                // Initialize Select2 for hotel_id
+                $('.hotel-select').select2({
+                    placeholder: 'Search for a hotel',
+                    ajax: {
+                        url: '/admin/api/hotels',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            return data;
+                        },
+                        cache: true
+                    },
+                    minimumInputLength: 2,
+                    width: '100%'
+                });
+
+                // Initialize Select2 for package_id with proper configuration
+                $('#package_id').select2({
+                    placeholder: 'Select a package',
+                    ajax: {
+                        url: '/admin/api/packages',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term
+                            };
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.results.map(pkg => ({
+                                    id: pkg.id,
+                                    text: pkg.text
+                                }))
+                            };
+                        },
+
+                        cache: true
+                    },
+                    minimumInputLength: 2,
+                    width: '100%'
+                });
+
+                // Upload image manually from 'Add' button
+                document.getElementById('gallery-image-button').addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.click();
+
+                    input.onchange = async () => {
+                        const file = input.files[0];
+                        const formData = new FormData();
+                        formData.append('image', file);
+
+                        try {
+                            const res = await fetch('/upload/itinerary/itinerary', {
+                                method: 'POST',
+                                body: formData,
+                            });
+
+                            if (!res.ok) throw new Error('Upload failed');
+
+                            const data = await res.json();
+                            const url = data.file;
+
+                            // Add to gallery (if gallery row exists)
+                            const row = document.querySelector('.gallery-section .row.g-3');
+                            if (row) {
+                                const colDiv = document.createElement('div');
+                                colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-3';
+
+                                colDiv.innerHTML = `
+                            <div class="card h-100 mt-4 shadow-sm">
+                                <div class="card-img-top d-flex justify-content-center align-items-center p-2" style="height: 150px;">
+                                    <img src="${url}" alt="Uploaded Image" class="img-fluid rounded cursor-pointer" style="max-height: 100%; width: auto;" />
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted text-truncate me-2" style="max-width: 70%;">
+                                            Image ${row.children.length + 1}
+                                        </small>
+                                        <button class="btn btn-sm btn-outline-secondary copy-url-btn" data-url="${url}" title="Copy URL">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                                row.prepend(colDiv);
+                            } else {
+                                // Create new row if it doesn't exist
+                                const gallerySection = document.querySelector('.gallery-section');
+                                const newRow = document.createElement('div');
+                                newRow.className = 'row g-3';
+
+                                newRow.innerHTML = `
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                                <div class="card h-100 mt-4 shadow-sm">
+                                    <div class="card-img-top d-flex justify-content-center align-items-center p-2" style="height: 150px;">
+                                        <img src="${url}" alt="Uploaded Image" class="img-fluid rounded cursor-pointer" style="max-height: 100%; width: auto;" />
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted text-truncate me-2" style="max-width: 70%;">
+                                                Image 1
+                                            </small>
+                                            <button class="btn btn-sm btn-outline-secondary copy-url-btn" data-url="${url}" title="Copy URL">
+                                                <i class="bi bi-clipboard"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                                const container = gallerySection.querySelector('div[style*="max-height"]');
+                                container.innerHTML = '';
+                                container.appendChild(newRow);
+                            }
+                        } catch (err) {
+                            console.error('Image upload failed', err);
+                        }
+                    };
+                });
+
+                // Clipboard copy functionality for image URLs
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('copy-url-btn') || e.target.closest('.copy-url-btn')) {
+                        const button = e.target.classList.contains('copy-url-btn') ? e.target : e.target.closest('.copy-url-btn');
+                        const url = button.getAttribute('data-url');
+
+                        // Create a temporary toast notification
+                        const toast = document.createElement('div');
+                        toast.className = 'toast align-items-center text-white bg-success border-0 show';
+                        toast.setAttribute('role', 'alert');
+                        toast.setAttribute('aria-live', 'assertive');
+                        toast.setAttribute('aria-atomic', 'true');
+                        toast.innerHTML = `
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            URL copied to clipboard!
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                `;
+
+                        document.body.appendChild(toast);
+
+                        // Remove toast after 3 seconds
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                            setTimeout(() => toast.remove(), 300);
+                        }, 3000);
+
+                        // Copy to clipboard
+                        navigator.clipboard.writeText(url)
+                            .catch(err => {
+                                console.error('Failed to copy URL: ', err);
+                                toast.className = 'toast align-items-center text-white bg-danger border-0 show';
+                                toast.querySelector('.toast-body').textContent = 'Failed to copy URL';
+                            });
+                    }
+                });
+
+                // Modify your form element to ensure proper data submission
+                document.querySelector('form').addEventListener('submit', function (e) {
+                    // Prevent default form submission
+                    e.preventDefault();
+
+                    // Create FormData object
+                    const formData = new FormData(this);
+
+                    // Convert FormData to JSON
+                    const formDataObj = {};
+                    formData.forEach((value, key) => {
+                        // Handle nested objects for itineraries
+                        if (key.startsWith('itineraries[')) {
+                            const match = key.match(/itineraries\[(\d+)\]\[(\w+)\]/);
+                            if (match) {
+                                const index = match[1];
+                                const field = match[2];
+
+                                if (!formDataObj.itineraries) {
+                                    formDataObj.itineraries = [];
+                                }
+
+                                if (!formDataObj.itineraries[index]) {
+                                    formDataObj.itineraries[index] = {};
+                                }
+
+                                formDataObj.itineraries[index][field] = value;
+                            }
+                        } else {
+                            formDataObj[key] = value;
+                        }
+                    });
+
+                    // Convert itineraries array to proper format
+                    if (formDataObj.itineraries) {
+                        formDataObj.itineraries = Object.values(formDataObj.itineraries);
+                    }
+
+                    // Send data via fetch API
+                    fetch(this.action, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formDataObj)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                alert(data.error);
+                            } else {
+                                alert('Itineraries added successfully!');
+                                window.location.href = '/admin/itinerary/itinerary';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while saving itineraries.');
+                        });
+                });
+            });
+        </script>
+
+        <%- include('../layout/footer') %>

@@ -100,12 +100,69 @@
               <textarea name="description" id="description" style="display:none;"></textarea>
             </div>
 
-            <div class="mb-3">
+            <!-- <div class="mb-3">
               <label for="content">Content</label>
               <div id="editor" style="min-height: 300px; max-height: 300px; overflow-y: scroll;">
                 <%- hotel.content %>
               </div>
               <textarea name="content" id="content" style="display:none;"></textarea>
+            </div> -->
+            <div class="editor-container mb-3">
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Content</label>
+                    <textarea id="editor" name="content" class="form-control"
+                      style="min-height: 300px;"><%- hotel.content %></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-3">
+                <div class="col-12">
+                  <div class="gallery-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="mb-0">Gallery</h5>
+                      <button type="button" class="btn btn-primary btn-sm" id="gallery-image-button">
+                        Add
+                      </button>
+                    </div>
+
+                    <div style="max-height: 350px; overflow-y: auto; overflow-x: hidden;">
+                      <% if (images && images.length> 0) { %>
+                        <div class="row g-3">
+                          <% images.reverse().forEach((image, index)=> { %>
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                              <div class="card h-100 mt-4 shadow-sm">
+                                <div class="card-img-top d-flex justify-content-center align-items-center p-2"
+                                  style="height: 150px;">
+                                  <img src="<%= image %>" alt="Uploaded Image" class="img-fluid rounded cursor-pointer"
+                                    style="max-height: 100%; width: auto;" onclick="insertToEditor('<%= image %>')" />
+                                </div>
+                                <div class="card-body p-2">
+                                  <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted text-truncate me-2" style="max-width: 70%;">
+                                      Image <%= index + 1 %>
+                                    </small>
+                                    <button class="btn btn-sm btn-outline-secondary copy-url-btn"
+                                      data-url="<%= image %>" title="Copy URL">
+                                      <i class="bi bi-clipboard"></i>
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <% }) %>
+                        </div>
+                        <% } else { %>
+                          <div class="text-center py-3">
+                            <p class="text-muted">No previously uploaded images.</p>
+                          </div>
+                          <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="row">
@@ -118,8 +175,8 @@
                 <input type="text" class="form-control" name="meta_description" value="<%= hotel.meta_description %>">
               </div>
               <div class="col-md-4 mb-3">
-                <label for="meta_keywords">Meta Keywords</label>
-                <input type="text" class="form-control" name="meta_keywords" value="<%= hotel.meta_keywords %>">
+                <label for="canonical_url">Canonical Url</label>
+                <input type="url" class="form-control" name="canonical_url" value="<%= hotel.canonical_url %>">
               </div>
             </div>
 
@@ -157,7 +214,7 @@
             <div class="card border-0 shadow-sm">
               <div class="card-body">
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Main Image</label>
+                  <label class="form-label fw-semibold">Featured Image</label>
                   <input type="file" class="form-control mb-3" name="image" id="mainImageInput">
 
                   <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap">
@@ -232,32 +289,6 @@
     </div>
 
     <%- include('../layout/footer') %>
-
-      <div id="image-toolbar">
-        <button data-align="left">⬅️</button>
-        <button data-align="center">🔳</button>
-        <button data-align="right">➡️</button>
-      </div>
-
-      <style>
-        #image-toolbar {
-          position: absolute;
-          display: none;
-          background: #f8f9fa;
-          border: 1px solid #ddd;
-          padding: 5px 10px;
-          border-radius: 5px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          z-index: 1000;
-        }
-
-        #image-toolbar button {
-          border: none;
-          background: none;
-          margin: 0 5px;
-          cursor: pointer;
-        }
-      </style>
       <style>
         .image-preview {
           /* width: 100px;
@@ -272,95 +303,174 @@
       </style>
 
 
+      <!-- <script>
+        tinymce.init({
+          selector: '#editor',
+          height: 500,
+          plugins: 'image link code lists table',
+          toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist | image | link | table | code',
+          menubar: false,
+          setup: function (editor) {
+            // On form submit, set hidden input with editor content
+            // document.querySelector('form').addEventListener('submit', function () {
+            //     document.querySelector('#content').value = editor.getContent();
+            // });
+
+            // Expose function globally to insert image into editor
+            window.insertToEditor = function (imageUrl) {
+              editor.insertContent(`<img style="max-width: 300px;" src="${imageUrl}" />`);
+            };
+
+            // Handle custom image upload from the button
+            document.getElementById('gallery-image-button').addEventListener('click', () => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = 'image/*';
+              input.click();
+
+              input.onchange = async () => {
+                const file = input.files[0];
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                  const res = await fetch('/upload/hotel/content', {
+                    method: 'POST',
+                    body: formData,
+                  });
+
+                  if (!res.ok) throw new Error('Upload failed');
+
+                  const data = await res.json();
+                  const url = data.file;
+
+                  // Insert into editor
+                  editor.insertContent(`<img style="max-width: 300px;" src="${url}" />`);
+
+                  // Add to gallery
+                  const row = document.querySelector('.gallery-section .row.g-2');
+                  const colDiv = document.createElement('div');
+                  colDiv.className = 'col-6 col-md-4';
+
+                  const img = document.createElement('img');
+                  img.src = url;
+                  img.alt = 'Uploaded Image';
+                  img.className = 'img-fluid rounded selectable-image';
+                  img.style.cssText = 'height: 120px; object-fit: cover; cursor: pointer;';
+                  img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                  colDiv.appendChild(img);
+                  row.prepend(colDiv);
+                } catch (err) {
+                  console.error('Image upload failed', err);
+                }
+              };
+            });
+          }
+        });
+      </script> -->
+
       <script>
-        const quill = new Quill('#editor', {
-          theme: 'snow',
-          modules: {
-            toolbar: [
-              [{ header: [1, 2, false] }],
-              ['bold', 'italic', 'underline'],
-              ['blockquote', 'code-block'],
-              [{ list: 'ordered' }, { list: 'bullet' }],
-              ['link', 'image'],
-              ['clean']
-            ]
-          }
-        });
+        document.addEventListener('DOMContentLoaded', () => {
+          const btns = [
+            "bold", "italic", "underline", "strikethrough", "eraser", "ul", "ol",
+            "fontsize", "paragraph", "superscript", "subscript", "image", "video", "cut", "copy", "paste", "copyformat",
+            "hr", "table", "link", "left", "center", "right", "indent", "source", "file", "spellcheck", "fullsize",
+            "undo", "redo", "print", "selectall", "code"
+          ];
 
-        document.querySelector('form').addEventListener('submit', () => {
-          document.querySelector('#content').value = quill.root.innerHTML;
-        });
+          const editor = Jodit.make('#editor', {
+            height: 500,
+            buttons: btns,
+            toolbarAdaptive: false,
+            defaultActionOnPaste: "insert_clear_html"
+          });
 
-        const toolbar = quill.getModule('toolbar');
-        toolbar.addHandler('image', () => {
-          const input = document.createElement('input');
-          input.setAttribute('type', 'file');
-          input.setAttribute('accept', 'image/*');
-          input.click();
-
-          input.onchange = async () => {
-            const file = input.files[0];
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-              const res = await fetch('/upload/hotel/content', {
-                method: 'POST',
-                body: formData,
-              });
-
-              if (!res.ok) throw new Error('Upload failed');
-
-              const data = await res.json();
-              const url = data.file;
-
-              const range = quill.getSelection();
-              const imgTag = `<img style="max-width: 300px;" src="${url}">`;
-              quill.clipboard.dangerouslyPasteHTML(range.index, imgTag);
-            } catch (err) {
-              console.error('Image upload failed', err);
+          // Add 'img-fluid' class to inserted <img> tags on content change
+          editor.events.on('change', function (text) {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(text, 'text/html');
+            const imgs = htmlDoc.getElementsByTagName('img');
+            if (imgs) {
+              for (const img of imgs) {
+                if (!img.classList.contains('img-fluid')) {
+                  img.classList.add('img-fluid');
+                }
+              }
             }
+            text = htmlDoc.body.innerHTML;
+          });
+
+          // Override insertHTML to sanitize HTML using DOMPurify
+          editor.selection.originalInsertHTML = editor.selection.insertHTML;
+          editor.selection.insertHTML = html => {
+            var clean = DOMPurify.sanitize(html, {
+              ALLOWED_ATTR: ['src', 'href', 'target', 'class'],
+              ALLOWED_TAGS: [
+                'p', 'strong', 'ul', 'ol', 'li', 'i', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'quote', 'pre', 'sup', 'sub', 'img', 'table', 'colgroup', 'col', 'tr', 'td', 'tbody', 'thead',
+                'iframe', 'b', 'a'
+              ]
+            });
+            return editor.selection.originalInsertHTML(clean);
           };
-        });
 
-        const imageToolbar = document.getElementById('image-toolbar');
-        quill.root.addEventListener('click', (e) => {
-          if (e.target.tagName === 'IMG') {
-            const rect = e.target.getBoundingClientRect();
-            imageToolbar.style.left = `${rect.left + window.scrollX + rect.width / 2 - 60}px`;
-            imageToolbar.style.top = `${rect.top + window.scrollY - 40}px`;
-            imageToolbar.style.display = 'flex';
-            imageToolbar.currentImage = e.target;
-          } else {
-            imageToolbar.style.display = 'none';
-          }
-        });
+          // Define insertToEditor globally
+          window.insertToEditor = function (imageUrl) {
+            editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${imageUrl}" />`);
+          };
 
-        imageToolbar.addEventListener('click', (e) => {
-          const el = imageToolbar.currentImage;
-          const align = e.target.dataset.align;
-          if (!el || !align) return;
+          // Upload image manually from 'Add' button
+          document.getElementById('gallery-image-button').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.click();
 
-          if (align === 'left') {
-            el.style.float = 'left';
-            el.style.marginRight = '50px';
-            el.style.marginLeft = '0';
-            el.style.display = '';
-          } else if (align === 'right') {
-            el.style.float = 'right';
-            el.style.marginLeft = '50px';
-            el.style.marginRight = '0';
-            el.style.display = '';
-          } else if (align === 'center') {
-            el.style.float = '';
-            el.style.marginLeft = 'auto';
-            el.style.marginRight = 'auto';
-            el.style.display = 'block';
-          }
+            input.onchange = async () => {
+              const file = input.files[0];
+              const formData = new FormData();
+              formData.append('image', file);
 
-          imageToolbar.style.display = 'none';
+              try {
+                const res = await fetch('/upload/region/content', {
+                  method: 'POST',
+                  body: formData,
+                });
+
+                if (!res.ok) throw new Error('Upload failed');
+
+                const data = await res.json();
+                const url = data.file;
+
+                // Insert into editor
+                editor.selection.insertHTML(`<img class="img-fluid" style="max-width: 300px;" src="${url}" />`);
+
+                // Add to gallery (if gallery row exists)
+                const row = document.querySelector('.gallery-section .row.g-3');
+                if (row) {
+                  const colDiv = document.createElement('div');
+                  colDiv.className = 'col-12 col-sm-6 col-md-4 col-lg-2 d-flex justify-content-center';
+
+                  const img = document.createElement('img');
+                  img.src = url;
+                  img.alt = 'Uploaded Image';
+                  img.className = 'img-fluid rounded selectable-image border border-secondary';
+                  img.style.cssText = 'max-width: 100%; max-height: 120px; height: auto; cursor: pointer; padding: 2px;';
+                  img.setAttribute('onclick', `insertToEditor('${url}')`);
+
+                  colDiv.appendChild(img);
+                  row.prepend(colDiv);
+                }
+              } catch (err) {
+                console.error('Image upload failed', err);
+              }
+            };
+          });
         });
       </script>
+
+
       <script>
         document.getElementById('name').addEventListener('input', function () {
           const slug = this.value
@@ -370,6 +480,7 @@
           document.getElementById('slug').value = slug;
         });
       </script>
+
       <script>
 
         document.querySelector('form').onsubmit = function () {
@@ -379,6 +490,7 @@
           document.getElementById('delete_image_ids').value = deleteIds.join(',');
         };
       </script>
+
       <script>
         // MAIN IMAGE
         let mainFile = null;
@@ -453,6 +565,7 @@
           hotelImagesInput.files = dataTransfer.files;
         }
       </script>
+
       <script>
         $(document).ready(function () {
           $('#city_id').select2({
